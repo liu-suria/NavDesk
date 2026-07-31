@@ -14,6 +14,16 @@ const searchUrls = {
   duckduckgo: "https://duckduckgo.com/?q=",
 };
 
+function setBrand(settings = {}) {
+  const name = String(settings.brandName || "NavDesk").trim() || "NavDesk";
+  const mark = [...name][0]?.toUpperCase() || "N";
+  document.title = `${name} · 个人导航`;
+  $("#brandName").textContent = name;
+  $("#loginBrandName").textContent = name;
+  $("#brandMark").textContent = mark;
+  $("#loginBrandMark").textContent = mark;
+}
+
 function render(data) {
   navigation.replaceChildren();
   categoryRail.replaceChildren();
@@ -57,6 +67,7 @@ function showLogin(message = "") {
 function showNavigation(data) {
   loginScreen.hidden = true;
   app.hidden = false;
+  setBrand(data.settings);
   render(data);
 }
 

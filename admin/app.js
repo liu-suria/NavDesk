@@ -9,6 +9,12 @@ function domain(url) { try { return new URL(url).hostname.replace(/^www\./, "");
 function favicon(url) { try { return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(new URL(url).hostname)}&sz=64`; } catch { return ""; } }
 async function request(url, options = {}) { const response = await fetch(url, { credentials: "same-origin", ...options }); const body = await response.json().catch(() => ({})); if (!response.ok) throw new Error(body.error || `请求失败 (${response.status})`); return body; }
 function setTheme(theme) { document.documentElement.dataset.theme = theme; localStorage.setItem("navdesk-theme", theme); }
+function setBrand(settings = {}) {
+  const name = String(settings.brandName || "NavDesk").trim() || "NavDesk";
+  $("#brandName").textContent = name;
+  $("#brandMark").textContent = [...name][0]?.toUpperCase() || "N";
+  document.title = `${name} · 管理`;
+}
 
 async function save() {
   const button = $("#saveButton"); if (button) { button.disabled = true; button.textContent = "保存中…"; }
@@ -18,6 +24,7 @@ async function save() {
 }
 
 function render() {
+  setBrand(data.settings);
   groupsRoot.replaceChildren(); const links = data.groups.reduce((total, group) => total + group.links.length, 0);
   $("#summary").textContent = `${data.groups.length} 个分组 · ${links} 个链接`;
   if (!data.groups.length) { groupsRoot.innerHTML = '<section class="empty-admin"><h2>从一个分组开始</h2><p>例如：常用、服务器、开发、AI 或家庭。</p><button class="primary" id="emptyAddGroup">+ 新建分组</button></section>'; $("#emptyAddGroup").onclick = () => openGroup(); return; }
@@ -55,8 +62,14 @@ function linkAction(action, groupIndex, linkIndex) {
 }
 
 function showModal(type, editing) {
-  editorState = { type, ...editing }; $("#modalEyebrow").textContent = `${editing.index === undefined ? "NEW" : "EDIT"} ${type === "group" ? "GROUP" : "LINK"}`;
-  $("#modalTitle").textContent = `${editing.index === undefined ? "新建" : "编辑"}${type === "group" ? "分组" : "链接"}`;
+  editorState = { type, ...editing };
+  if (type === "settings") {
+    $("#modalEyebrow").textContent = "SITE SETTINGS";
+    $("#modalTitle").textContent = "站点设置";
+  } else {
+    $("#modalEyebrow").textContent = `${editing.index === undefined ? "NEW" : "EDIT"} ${type === "group" ? "GROUP" : "LINK"}`;
+    $("#modalTitle").textContent = `${editing.index === undefined ? "新建" : "编辑"}${type === "group" ? "分组" : "链接"}`;
+  }
   dialog.showModal();
 }
 function input(label, name, value = "", options = {}) { return `<div class="field ${options.className || ""}"><label for="field-${name}">${label}</label>${options.textarea ? `<textarea id="field-${name}" name="${name}" placeholder="${options.placeholder || ""}">${escapeHtml(value)}</textarea>` : `<input id="field-${name}" name="${name}" value="${escapeHtml(value)}" ${options.required ? "required" : ""} ${options.type ? `type="${options.type}"` : ""} placeholder="${options.placeholder || ""}" />`}${options.hint ? `<span class="hint">${options.hint}</span>` : ""}</div>`; }
@@ -71,11 +84,21 @@ function openLink(groupIndex, index) {
   showModal("link", { groupIndex, index });
 }
 
+function openSettings() {
+  const settings = data.settings || {};
+  fields.innerHTML = `<div class="fields"><div class="form-intro"><strong>站点显示</strong><span>用于左上角品牌名称、浏览器标题和登录按钮。</span></div>${input("左上角名称", "brandName", settings.brandName || "NavDesk", { required: true, placeholder: "例如：Suria 的导航" })}</div>`;
+  showModal("settings", {});
+}
+
 $("#editorForm").onsubmit = async (event) => {
   event.preventDefault(); if (event.submitter?.value === "cancel") return dialog.close(); const form = new FormData(event.currentTarget);
   if (editorState.type === "group") {
     const group = { id: editorState.index === undefined ? uid() : data.groups[editorState.index].id, name: String(form.get("name") || "").trim(), icon: String(form.get("icon") || "").trim(), color: String(form.get("color") || "#6d7cff"), links: editorState.index === undefined ? [] : data.groups[editorState.index].links };
     if (!group.name) return; editorState.index === undefined ? data.groups.push(group) : data.groups.splice(editorState.index, 1, group);
+  } else if (editorState.type === "settings") {
+    const brandName = String(form.get("brandName") || "").trim().slice(0, 24);
+    if (!brandName) return;
+    data.settings = { ...(data.settings || {}), brandName };
   } else {
     const link = { id: editorState.index === undefined ? uid() : data.groups[editorState.groupIndex].links[editorState.index].id, name: String(form.get("name") || "").trim(), url: String(form.get("url") || "").trim(), description: String(form.get("description") || "").trim(), icon: String(form.get("icon") || "").trim(), openInNew: form.get("openInNew") === "on" };
     try { const url = new URL(link.url); if (!/^https?:$/.test(url.protocol)) throw new Error(); } catch { alert("请输入有效的 http 或 https 网址"); return; }
@@ -84,7 +107,7 @@ $("#editorForm").onsubmit = async (event) => {
   dialog.close(); await save();
 };
 
-$("#addGroupButton").onclick = () => openGroup(); $("#addLinkButton").onclick = () => data.groups.length ? openLink(0) : openGroup();
+$("#addGroupButton").onclick = () => openGroup(); $("#addLinkButton").onclick = () => data.groups.length ? openLink(0) : openGroup(); $("#settingsButton").onclick = () => openSettings();
 $("#themeButton").onclick = () => setTheme(document.documentElement.dataset.theme === "light" ? "dark" : "light");
 $("#logoutButton").onclick = async () => { await request("/api/auth/logout", { method: "POST" }); location.reload(); };
 $("#exportButton").onclick = () => { const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `navdesk-${new Date().toISOString().slice(0, 10)}.json`; a.click(); URL.revokeObjectURL(url); };

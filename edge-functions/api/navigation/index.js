@@ -28,7 +28,12 @@ function sanitise(data) {
     if (links.length > 150) throw new Error("单个分组最多 150 个链接");
     return { id, name, icon: cleanText(group.icon, 8), color: /^#[0-9a-fA-F]{6}$/.test(group.color || "") ? group.color : DEFAULT_COLOR, sort: groupIndex, links };
   });
-  return { version: 1, updatedAt: new Date().toISOString(), groups };
+  return {
+    version: 1,
+    updatedAt: new Date().toISOString(),
+    settings: { brandName: cleanText(data?.settings?.brandName || "NavDesk", 24) || "NavDesk" },
+    groups,
+  };
 }
 
 export async function onRequestGet(context) {

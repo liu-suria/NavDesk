@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#10131f" />
+  <meta name="theme-color" content="#fbf7f8" />
   <title>NavDesk · 个人导航</title>
-  <link rel="stylesheet" href="/style.css?v=4" />
+  <link rel="stylesheet" href="/style.css?v=5" />
 </head>
 <body class="app-shell">
   <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
   <main class="container" id="app" hidden>
     <header class="topbar">
-      <a class="brand" href="/"><span class="brand-mark">N</span><span>NavDesk</span></a>
+      <a class="brand" href="/"><span class="brand-mark" id="brandMark">N</span><span id="brandName">NavDesk</span></a>
       <form class="web-search" id="webSearchForm" role="search">
         <label class="sr-only" for="searchEngine">搜索引擎</label>
         <select id="searchEngine" aria-label="选择搜索引擎">
@@ -31,9 +31,9 @@
     </div>
   </main>
   <section class="login-screen" id="loginScreen" hidden>
-    <div class="login-card"><span class="brand-mark large">N</span><p class="eyebrow">PRIVATE NAVIGATION</p><h1>你的个人导航台</h1><p>输入密码，进入仅属于你的工作空间。</p><form id="loginForm"><input id="password" type="password" autocomplete="current-password" placeholder="请输入密码" required /><button class="primary" type="submit">进入 NavDesk <span>→</span></button><p class="form-message" id="loginMessage"></p></form></div>
+    <div class="login-card"><span class="brand-mark large" id="loginBrandMark">N</span><p class="eyebrow">PRIVATE NAVIGATION</p><h1>你的个人导航台</h1><p>输入密码，进入仅属于你的工作空间。</p><form id="loginForm"><input id="password" type="password" autocomplete="current-password" placeholder="请输入密码" required /><button class="primary" type="submit">进入 <span id="loginBrandName">NavDesk</span> <span>→</span></button><p class="form-message" id="loginMessage"></p></form></div>
   </section>
   <template id="groupTemplate"><section class="nav-group"><div class="group-heading"><span class="group-icon"></span><h2></h2><span class="count"></span></div><div class="cards"></div></section></template>
-  <script src="/app.js?v=4" defer></script>
+  <script src="/app.js?v=5" defer></script>
 </body>
 </html>
