@@ -547,36 +547,65 @@ body {
   .cards { grid-template-columns: repeat(auto-fill, 144px); }
 }
 @media (max-width: 650px) {
-  .container { padding: 0 15px 42px; }
+  .container { padding: 0 15px calc(94px + env(safe-area-inset-bottom)); }
   .topbar {
-    height: auto;
-    min-height: 112px;
-    flex-wrap: wrap;
+    height: 58px;
+    min-height: 58px;
     gap: 9px;
-    padding: 10px 0;
+    padding: 8px 0;
+  }
+  .brand { min-width: 0; flex: 1 1 auto; }
+  .brand #brandName {
+    display: block !important;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 16px;
   }
   .top-actions { margin-left: auto; }
   .admin-link { height: 32px; padding: 0 10px; }
-  .web-search { order: 3; flex-basis: 100%; max-width: none; height: 40px; }
-  .web-search select { max-width: 105px; padding-left: 10px; }
+  .web-search {
+    position: fixed;
+    z-index: 10;
+    left: 15px;
+    right: 15px;
+    bottom: max(12px, env(safe-area-inset-bottom));
+    width: auto;
+    max-width: none;
+    height: 54px;
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(75, 44, 56, 0.18);
+  }
+  .web-search select { max-width: 115px; padding-left: 13px; font-size: 14px; }
+  .web-search input { padding-inline: 14px; font-size: 15px; }
+  .web-search button { width: 52px; font-size: 31px; }
   .workspace-layout { display: block; margin-top: 10px; }
   .category-rail {
     position: sticky;
-    top: 106px;
+    top: 58px;
     z-index: 3;
     display: flex;
-    gap: 7px;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
     max-height: none;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 9px 0 12px;
-    background: color-mix(in srgb, var(--bg) 88%, transparent);
-    backdrop-filter: blur(14px);
+    overflow: visible;
+    padding: 10px 0 11px;
+    background: var(--bg);
   }
-  .category-rail a { flex: 0 0 auto; padding: 5px 8px; border: 1px solid var(--line); background: var(--surface); }
-  .category-rail a span { width: 19px; height: 19px; flex-basis: 19px; font-size: 10px; }
+  .category-rail a {
+    flex: 0 0 auto;
+    min-height: 38px;
+    padding: 7px 11px;
+    gap: 8px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    font-size: 13px;
+  }
+  .category-rail a span { width: 22px; height: 22px; flex-basis: 22px; font-size: 11px; }
   .navigation { gap: 12px; }
-  .nav-group { scroll-margin-top: 163px; }
+  .nav-group { scroll-margin-top: 115px; }
   .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
   .nav-card { min-height: 64px; padding: 9px; }
   .card-copy strong { font-size: 12px; }
