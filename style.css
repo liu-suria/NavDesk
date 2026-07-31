@@ -424,7 +424,6 @@ body {
   z-index: 4;
   height: 68px;
   gap: 24px;
-  background: color-mix(in srgb, var(--bg) 78%, transparent);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
 }
@@ -544,7 +543,6 @@ body {
 @media (max-width: 960px) {
   .container { padding-inline: 24px; }
   .topbar { gap: 16px; }
-  .brand > span:last-child { display: none; }
   .clock { display: none; }
   .cards { grid-template-columns: repeat(auto-fill, 144px); }
 }

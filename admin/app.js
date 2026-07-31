@@ -107,6 +107,10 @@ $("#editorForm").onsubmit = async (event) => {
   dialog.close(); await save();
 };
 
+document.querySelectorAll("[data-close-editor]").forEach((button) => {
+  button.addEventListener("click", () => dialog.close());
+});
+
 $("#addGroupButton").onclick = () => openGroup(); $("#addLinkButton").onclick = () => data.groups.length ? openLink(0) : openGroup(); $("#settingsButton").onclick = () => openSettings();
 $("#themeButton").onclick = () => setTheme(document.documentElement.dataset.theme === "light" ? "dark" : "light");
 $("#logoutButton").onclick = async () => { await request("/api/auth/logout", { method: "POST" }); location.reload(); };
