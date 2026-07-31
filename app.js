@@ -31,7 +31,20 @@ function render(data, query = "") {
   if (!visibleGroups) navigation.innerHTML = `<div class="empty"><span>◌</span><h2>${text ? "没有找到匹配的入口" : "这里还没有导航链接"}</h2><p>${text ? "换个关键词试试。" : "前往管理页，添加你的第一个链接。"}</p>${text ? "" : '<a href="/admin/">打开管理页</a>'}</div>`;
 }
 
-async function request(url, options) { const response = await fetch(url, options); const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`); return data; }
+async function request(url, options = {}) { const response = await fetch(url, { credentials: "same-origin", ...options }); const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`); return data; }
+
+function showLogin(message = "") {
+  app.hidden = true;
+  loginScreen.hidden = false;
+  $("#loginMessage").textContent = message;
+}
+
+function showNavigation(data) {
+  loginScreen.hidden = true;
+  app.hidden = false;
+  render(data);
+  $("#searchInput").oninput = (event) => render(data, event.target.value);
+}
 
 async function initialise() {
   formatClock(); setInterval(formatClock, 30_000);
@@ -39,12 +52,30 @@ async function initialise() {
   $("#themeButton").onclick = () => setTheme(document.documentElement.dataset.theme === "light" ? "dark" : "light");
   try {
     const session = await request("/api/auth/session");
-    if (!session.authenticated) { loginScreen.hidden = false; return; }
-    const data = await request("/api/navigation"); app.hidden = false;
-    render(data); $("#searchInput").oninput = (event) => render(data, event.target.value);
+    if (!session.authenticated) { showLogin(); return; }
+    const data = await request("/api/navigation");
+    showNavigation(data);
     document.addEventListener("keydown", (event) => { if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") { event.preventDefault(); $("#searchInput").focus(); } });
-  } catch { loginScreen.hidden = false; $("#loginMessage").textContent = "服务暂不可用，请稍后重试。"; }
+  } catch { showLogin("服务暂不可用，请稍后重试。"); }
 }
 
-$("#loginForm").onsubmit = async (event) => { event.preventDefault(); const button = $("button", event.currentTarget); button.disabled = true; $("#loginMessage").textContent = ""; try { await request("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: $("#password").value }) }); location.reload(); } catch (error) { $("#loginMessage").textContent = error.message; } finally { button.disabled = false; } };
+$("#loginForm").onsubmit = async (event) => {
+  event.preventDefault();
+  const button = $("button", event.currentTarget);
+  button.disabled = true;
+  button.innerHTML = "正在验证…";
+  $("#loginMessage").textContent = "";
+  try {
+    await request("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: $("#password").value }) });
+    const session = await request("/api/auth/session", { cache: "no-store" });
+    if (!session.authenticated) throw new Error("登录状态没有保存成功。请确认浏览器允许此网站使用 Cookie 后重试。");
+    const data = await request("/api/navigation", { cache: "no-store" });
+    showNavigation(data);
+  } catch (error) {
+    $("#loginMessage").textContent = error.message || "登录失败，请稍后重试。";
+  } finally {
+    button.disabled = false;
+    button.innerHTML = "进入 NavDesk <span>→</span>";
+  }
+};
 initialise();

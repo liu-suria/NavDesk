@@ -7,7 +7,7 @@ function uid() { return crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}
 function escapeHtml(value) { const node = document.createElement("span"); node.textContent = value || ""; return node.innerHTML; }
 function domain(url) { try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return ""; } }
 function favicon(url) { try { return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(new URL(url).hostname)}&sz=64`; } catch { return ""; } }
-async function request(url, options) { const response = await fetch(url, options); const body = await response.json().catch(() => ({})); if (!response.ok) throw new Error(body.error || `请求失败 (${response.status})`); return body; }
+async function request(url, options = {}) { const response = await fetch(url, { credentials: "same-origin", ...options }); const body = await response.json().catch(() => ({})); if (!response.ok) throw new Error(body.error || `请求失败 (${response.status})`); return body; }
 function setTheme(theme) { document.documentElement.dataset.theme = theme; localStorage.setItem("navdesk-theme", theme); }
 
 async function save() {
@@ -92,7 +92,27 @@ $("#importButton").onclick = () => $("#fileInput").click(); $("#fileInput").onch
 
 async function initialise() {
   setTheme(localStorage.getItem("navdesk-theme") || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"));
-  try { const session = await request("/api/auth/session"); if (!session.authenticated) { $("#loginScreen").hidden = false; return; } data = await request("/api/navigation"); $("#adminApp").hidden = false; render(); } catch { $("#loginScreen").hidden = false; $("#loginMessage").textContent = "服务暂不可用，请稍后重试。"; }
+  try { const session = await request("/api/auth/session"); if (!session.authenticated) { $("#loginScreen").hidden = false; return; } data = await request("/api/navigation"); $("#loginScreen").hidden = true; $("#adminApp").hidden = false; render(); } catch { $("#loginScreen").hidden = false; $("#loginMessage").textContent = "服务暂不可用，请稍后重试。"; }
 }
-$("#loginForm").onsubmit = async (event) => { event.preventDefault(); const button = $("button", event.currentTarget); button.disabled = true; $("#loginMessage").textContent = ""; try { await request("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: $("#password").value }) }); location.reload(); } catch (error) { $("#loginMessage").textContent = error.message; } finally { button.disabled = false; } };
+$("#loginForm").onsubmit = async (event) => {
+  event.preventDefault();
+  const button = $("button", event.currentTarget);
+  button.disabled = true;
+  button.innerHTML = "正在验证…";
+  $("#loginMessage").textContent = "";
+  try {
+    await request("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: $("#password").value }) });
+    const session = await request("/api/auth/session", { cache: "no-store" });
+    if (!session.authenticated) throw new Error("登录状态没有保存成功。请确认浏览器允许此网站使用 Cookie 后重试。");
+    data = await request("/api/navigation", { cache: "no-store" });
+    $("#loginScreen").hidden = true;
+    $("#adminApp").hidden = false;
+    render();
+  } catch (error) {
+    $("#loginMessage").textContent = error.message || "登录失败，请稍后重试。";
+  } finally {
+    button.disabled = false;
+    button.innerHTML = "进入管理台 <span>→</span>";
+  }
+};
 initialise();
