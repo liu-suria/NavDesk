@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#10131f" />
+  <title>NavDesk · 个人导航</title>
+  <link rel="stylesheet" href="/style.css?v=1" />
+</head>
+<body class="app-shell">
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <main class="container" id="app" hidden>
+    <header class="topbar">
+      <a class="brand" href="/"><span class="brand-mark">N</span><span>NavDesk</span></a>
+      <div class="top-actions"><span id="clock" class="clock"></span><button class="icon-button" id="themeButton" title="切换主题">◐</button><a class="admin-link" href="/admin/">管理</a></div>
+    </header>
+    <section class="welcome">
+      <p class="eyebrow">PRIVATE WORKSPACE</p>
+      <h1>你好，今天想去哪里？</h1>
+      <p>把常用网站、服务和工作入口放在一个安静的地方。</p>
+      <label class="search"><span>⌕</span><input id="searchInput" type="search" autocomplete="off" placeholder="搜索名称、备注或网址…" /><kbd>⌘ K</kbd></label>
+    </section>
+    <section id="navigation" class="navigation" aria-live="polite"></section>
+  </main>
+  <section class="login-screen" id="loginScreen" hidden>
+    <div class="login-card"><span class="brand-mark large">N</span><p class="eyebrow">PRIVATE NAVIGATION</p><h1>你的个人导航台</h1><p>输入密码，进入仅属于你的工作空间。</p><form id="loginForm"><input id="password" type="password" autocomplete="current-password" placeholder="请输入密码" required /><button class="primary" type="submit">进入 NavDesk <span>→</span></button><p class="form-message" id="loginMessage"></p></form></div>
+  </section>
+  <template id="groupTemplate"><section class="nav-group"><div class="group-heading"><span class="group-icon"></span><h2></h2><span class="count"></span></div><div class="cards"></div></section></template>
+  <script src="/app.js?v=1"></script>
+</body>
+</html>
