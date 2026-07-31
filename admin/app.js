@@ -59,7 +59,7 @@ function showModal(type, editing) {
   $("#modalTitle").textContent = `${editing.index === undefined ? "新建" : "编辑"}${type === "group" ? "分组" : "链接"}`;
   dialog.showModal();
 }
-function input(label, name, value = "", options = {}) { return `<div class="field"><label for="field-${name}">${label}</label>${options.textarea ? `<textarea id="field-${name}" name="${name}" placeholder="${options.placeholder || ""}">${escapeHtml(value)}</textarea>` : `<input id="field-${name}" name="${name}" value="${escapeHtml(value)}" ${options.required ? "required" : ""} ${options.type ? `type="${options.type}"` : ""} placeholder="${options.placeholder || ""}" />`}${options.hint ? `<span class="hint">${options.hint}</span>` : ""}</div>`; }
+function input(label, name, value = "", options = {}) { return `<div class="field ${options.className || ""}"><label for="field-${name}">${label}</label>${options.textarea ? `<textarea id="field-${name}" name="${name}" placeholder="${options.placeholder || ""}">${escapeHtml(value)}</textarea>` : `<input id="field-${name}" name="${name}" value="${escapeHtml(value)}" ${options.required ? "required" : ""} ${options.type ? `type="${options.type}"` : ""} placeholder="${options.placeholder || ""}" />`}${options.hint ? `<span class="hint">${options.hint}</span>` : ""}</div>`; }
 function openGroup(index) {
   const group = index === undefined ? { name: "", icon: "", color: "#6d7cff" } : data.groups[index];
   fields.innerHTML = `<div class="fields">${input("分组名称", "name", group.name, { required: true, placeholder: "例如：开发工具" })}<div class="two-fields">${input("图标（可选）", "icon", group.icon, { placeholder: "例如：◈" })}<div class="field"><label for="field-color">主题色</label><input id="field-color" name="color" type="color" value="${escapeHtml(group.color || "#6d7cff")}" /></div></div></div>`;
@@ -67,7 +67,7 @@ function openGroup(index) {
 }
 function openLink(groupIndex, index) {
   const link = index === undefined ? { name: "", url: "", description: "", icon: "", openInNew: true } : data.groups[groupIndex].links[index];
-  fields.innerHTML = `<div class="fields">${input("名称", "name", link.name, { required: true, placeholder: "例如：ChatGPT" })}${input("网址", "url", link.url, { required: true, type: "url", placeholder: "https://…" })}${input("备注（可选）", "description", link.description, { textarea: true, placeholder: "一句话说明这个入口" })}${input("自定义图标地址（可选）", "icon", link.icon, { type: "url", placeholder: "留空将自动显示站点图标" })}<label class="checkbox"><input name="openInNew" type="checkbox" ${link.openInNew !== false ? "checked" : ""} /> 在新窗口打开</label></div>`;
+  fields.innerHTML = `<div class="fields link-fields"><div class="form-intro"><strong>链接信息</strong><span>填写名称和网址即可，图标会自动获取。</span></div><div class="two-fields">${input("名称", "name", link.name, { required: true, placeholder: "例如：ChatGPT" })}${input("网址", "url", link.url, { required: true, type: "url", placeholder: "https://…" })}</div>${input("备注（可选）", "description", link.description, { textarea: true, placeholder: "一句话说明这个入口" })}<details class="advanced-fields"><summary>更多设置</summary><div>${input("自定义图标地址（可选）", "icon", link.icon, { type: "url", placeholder: "留空将自动显示站点图标" })}</div></details><label class="checkbox"><input name="openInNew" type="checkbox" ${link.openInNew !== false ? "checked" : ""} /> 在新窗口打开</label></div>`;
   showModal("link", { groupIndex, index });
 }
 

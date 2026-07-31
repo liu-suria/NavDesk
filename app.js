@@ -1,5 +1,5 @@
 const $ = (selector, root = document) => root.querySelector(selector);
-const app = $("#app"), loginScreen = $("#loginScreen"), navigation = $("#navigation");
+const app = $("#app"), loginScreen = $("#loginScreen"), navigation = $("#navigation"), categoryRail = $("#categoryRail");
 
 function escapeHtml(value) { const element = document.createElement("span"); element.textContent = value || ""; return element.innerHTML; }
 function hostname(url) { try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return ""; } }
@@ -7,14 +7,24 @@ function favicon(url) { try { return `https://www.google.com/s2/favicons?domain=
 function formatClock() { $("#clock").textContent = new Intl.DateTimeFormat("zh-CN", { month: "long", day: "numeric", weekday: "short", hour: "2-digit", minute: "2-digit" }).format(new Date()).replace("星期", "周"); }
 function setTheme(theme) { document.documentElement.dataset.theme = theme; localStorage.setItem("navdesk-theme", theme); }
 
-function render(data, query = "") {
+const searchUrls = {
+  google: "https://www.google.com/search?q=",
+  bing: "https://www.bing.com/search?q=",
+  baidu: "https://www.baidu.com/s?wd=",
+  duckduckgo: "https://duckduckgo.com/?q=",
+};
+
+function render(data) {
   navigation.replaceChildren();
-  const text = query.toLowerCase().trim(); let visibleGroups = 0;
+  categoryRail.replaceChildren();
+  let visibleGroups = 0;
   data.groups.forEach((group) => {
-    const links = group.links.filter((link) => !text || [link.name, link.description, link.url].join(" ").toLowerCase().includes(text));
+    const links = group.links;
     if (!links.length) return;
     visibleGroups += 1;
     const node = $("#groupTemplate").content.firstElementChild.cloneNode(true);
+    const groupId = `group-${group.id || visibleGroups}`;
+    node.id = groupId;
     $(".group-icon", node).textContent = group.icon || "◆";
     $(".group-icon", node).style.background = `${group.color}22`;
     $(".group-icon", node).style.color = group.color;
@@ -27,8 +37,13 @@ function render(data, query = "") {
       cards.append(a);
     });
     navigation.append(node);
+    const jump = document.createElement("a");
+    jump.href = `#${groupId}`;
+    jump.title = group.name;
+    jump.innerHTML = `<span style="color:${escapeHtml(group.color || "#8692ff")};background:${escapeHtml(group.color || "#8692ff")}22">${escapeHtml(group.icon || "◆")}</span><b>${escapeHtml(group.name)}</b>`;
+    categoryRail.append(jump);
   });
-  if (!visibleGroups) navigation.innerHTML = `<div class="empty"><span>◌</span><h2>${text ? "没有找到匹配的入口" : "这里还没有导航链接"}</h2><p>${text ? "换个关键词试试。" : "前往管理页，添加你的第一个链接。"}</p>${text ? "" : '<a href="/admin/">打开管理页</a>'}</div>`;
+  if (!visibleGroups) navigation.innerHTML = '<div class="empty"><span>◌</span><h2>这里还没有导航链接</h2><p>前往管理页，添加你的第一个链接。</p><a href="/admin/">打开管理页</a></div>';
 }
 
 async function request(url, options = {}) { const response = await fetch(url, { credentials: "same-origin", ...options }); const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`); return data; }
@@ -43,7 +58,6 @@ function showNavigation(data) {
   loginScreen.hidden = true;
   app.hidden = false;
   render(data);
-  $("#searchInput").oninput = (event) => render(data, event.target.value);
 }
 
 async function initialise() {
@@ -78,4 +92,14 @@ $("#loginForm").onsubmit = async (event) => {
     button.innerHTML = "进入 NavDesk <span>→</span>";
   }
 };
+
+$("#webSearchForm").onsubmit = (event) => {
+  event.preventDefault();
+  const query = $("#searchInput").value.trim();
+  if (!query) return $("#searchInput").focus();
+  const engine = $("#searchEngine").value;
+  localStorage.setItem("navdesk-search-engine", engine);
+  window.open(`${searchUrls[engine] || searchUrls.google}${encodeURIComponent(query)}`, "_blank", "noopener");
+};
+$("#searchEngine").value = localStorage.getItem("navdesk-search-engine") || "google";
 initialise();
