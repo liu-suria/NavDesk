@@ -1,0 +1,9 @@
+{
+  "name": "NavDesk",
+  "short_name": "NavDesk",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fcf8f9",
+  "theme_color": "#fbf7f8",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
