@@ -64,6 +64,21 @@ body {
   margin: auto;
   padding: 26px 42px 90px;
 }
+.boot-screen {
+  min-height: calc(100vh - 150px);
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.boot-screen .brand-mark {
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  font-size: 21px;
+}
 .topbar {
   height: 48px;
   display: flex;
@@ -518,6 +533,11 @@ body {
   font-weight: 650;
 }
 .navigation { gap: 12px; }
+.boot-screen ~ .topbar,
+.boot-screen ~ .workspace-layout { display: none; }
+.boot-screen[hidden] ~ .topbar,
+.boot-screen[hidden] ~ .workspace-layout { display: flex; }
+.boot-screen[hidden] ~ .workspace-layout { display: grid; }
 .nav-group { scroll-margin-top: 96px; }
 .group-heading { margin-bottom: 10px; }
 .group-heading h2 { font-size: 15px; }
@@ -580,6 +600,7 @@ body {
   .web-search input { padding-inline: 14px; font-size: 15px; }
   .web-search button { width: 52px; font-size: 31px; }
   .workspace-layout { display: block; margin-top: 0; }
+  .boot-screen[hidden] ~ .workspace-layout { display: block; }
   .category-rail {
     position: sticky;
     top: 0;
