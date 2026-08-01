@@ -5,11 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#fbf7f8" />
   <title>NavDesk · 个人导航</title>
-  <link rel="stylesheet" href="/style.css?v=12" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/favicon.svg" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <link rel="stylesheet" href="/style.css?v=13" />
 </head>
 <body class="app-shell">
   <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
   <main class="container" id="app" hidden>
+    <div class="boot-screen" id="bootScreen" aria-live="polite"><span class="brand-mark">N</span><span>正在打开导航…</span></div>
     <header class="topbar">
       <a class="brand" href="/"><span class="brand-mark" id="brandMark">N</span><span id="brandName">NavDesk</span></a>
       <form class="web-search" id="webSearchForm" role="search">
@@ -34,6 +38,6 @@
     <div class="login-card"><span class="brand-mark large" id="loginBrandMark">N</span><p class="eyebrow">PRIVATE NAVIGATION</p><h1>你的个人导航台</h1><p>输入密码，进入仅属于你的工作空间。</p><form id="loginForm"><input id="password" type="password" autocomplete="current-password" placeholder="请输入密码" required /><button class="primary" type="submit">进入 <span id="loginBrandName">NavDesk</span> <span>→</span></button><p class="form-message" id="loginMessage"></p></form></div>
   </section>
   <template id="groupTemplate"><section class="nav-group"><div class="group-heading"><span class="group-icon"></span><h2></h2><span class="count"></span></div><div class="cards"></div></section></template>
-  <script src="/app.js?v=6" defer></script>
+  <script src="/app.js?v=7" defer></script>
 </body>
 </html>
