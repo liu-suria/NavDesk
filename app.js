@@ -1,5 +1,7 @@
 const $ = (selector, root = document) => root.querySelector(selector);
 const app = $("#app"), loginScreen = $("#loginScreen"), navigation = $("#navigation"), categoryRail = $("#categoryRail");
+const bootScreen = $("#bootScreen");
+const NAVIGATION_CACHE_KEY = "navdesk-navigation-cache-v1";
 
 function escapeHtml(value) { const element = document.createElement("span"); element.textContent = value || ""; return element.innerHTML; }
 function hostname(url) { try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return ""; } }
@@ -43,7 +45,7 @@ function render(data) {
     links.forEach((link) => {
       const a = document.createElement("a"); a.className = "nav-card"; a.href = link.url; a.target = link.openInNew ? "_blank" : "_self"; a.rel = "noreferrer";
       const icon = link.icon || favicon(link.url);
-      a.innerHTML = `<span class="site-icon">${icon ? `<img src="${escapeHtml(icon)}" alt="" onerror="this.remove()">` : "↗"}</span><span class="card-copy"><strong>${escapeHtml(link.name)}</strong><small>${escapeHtml(link.description || hostname(link.url))}</small></span><span class="arrow">↗</span>`;
+      a.innerHTML = `<span class="site-icon">${icon ? `<img src="${escapeHtml(icon)}" alt="" loading="lazy" decoding="async" onerror="this.remove()">` : "↗"}</span><span class="card-copy"><strong>${escapeHtml(link.name)}</strong><small>${escapeHtml(link.description || hostname(link.url))}</small></span><span class="arrow">↗</span>`;
       cards.append(a);
     });
     navigation.append(node);
@@ -56,7 +58,27 @@ function render(data) {
   if (!visibleGroups) navigation.innerHTML = '<div class="empty"><span>◌</span><h2>这里还没有导航链接</h2><p>前往管理页，添加你的第一个链接。</p><a href="/admin/">打开管理页</a></div>';
 }
 
-async function request(url, options = {}) { const response = await fetch(url, { credentials: "same-origin", ...options }); const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`); return data; }
+async function request(url, options = {}) {
+  const response = await fetch(url, { credentials: "same-origin", ...options });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) { const error = new Error(data.error || `Request failed (${response.status})`); error.status = response.status; throw error; }
+  return data;
+}
+
+function readCachedNavigation() {
+  try {
+    const cached = JSON.parse(localStorage.getItem(NAVIGATION_CACHE_KEY) || "");
+    return cached && Array.isArray(cached.groups) ? cached : null;
+  } catch { return null; }
+}
+
+function cacheNavigation(data) {
+  try { localStorage.setItem(NAVIGATION_CACHE_KEY, JSON.stringify(data)); } catch { /* Private mode or full storage: network data remains usable. */ }
+}
+
+function clearCachedNavigation() {
+  try { localStorage.removeItem(NAVIGATION_CACHE_KEY); } catch { /* Nothing to clear. */ }
+}
 
 function showLogin(message = "") {
   app.hidden = true;
@@ -67,6 +89,7 @@ function showLogin(message = "") {
 function showNavigation(data) {
   loginScreen.hidden = true;
   app.hidden = false;
+  bootScreen.hidden = true;
   setBrand(data.settings);
   render(data);
 }
@@ -75,13 +98,20 @@ async function initialise() {
   formatClock(); setInterval(formatClock, 30_000);
   setTheme(localStorage.getItem("navdesk-theme") || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"));
   $("#themeButton").onclick = () => setTheme(document.documentElement.dataset.theme === "light" ? "dark" : "light");
+  const cached = readCachedNavigation();
+  if (cached) showNavigation(cached);
+  else app.hidden = false;
   try {
-    const session = await request("/api/auth/session");
-    if (!session.authenticated) { showLogin(); return; }
-    const data = await request("/api/navigation");
+    // Navigation already verifies the session. Combining the former session check and
+    // data request removes a full Worker round trip from every page opening.
+    const data = await request("/api/navigation", { cache: "no-store" });
+    cacheNavigation(data);
     showNavigation(data);
     document.addEventListener("keydown", (event) => { if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") { event.preventDefault(); $("#searchInput").focus(); } });
-  } catch { showLogin("服务暂不可用，请稍后重试。"); }
+  } catch (error) {
+    if (error.status === 401) { clearCachedNavigation(); showLogin(); return; }
+    if (!cached) showLogin("服务暂不可用，请稍后重试。");
+  }
 }
 
 $("#loginForm").onsubmit = async (event) => {
@@ -95,6 +125,7 @@ $("#loginForm").onsubmit = async (event) => {
     const session = await request("/api/auth/session", { cache: "no-store" });
     if (!session.authenticated) throw new Error("登录状态没有保存成功。请确认浏览器允许此网站使用 Cookie 后重试。");
     const data = await request("/api/navigation", { cache: "no-store" });
+    cacheNavigation(data);
     showNavigation(data);
   } catch (error) {
     $("#loginMessage").textContent = error.message || "登录失败，请稍后重试。";
