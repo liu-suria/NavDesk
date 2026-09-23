@@ -1,0 +1,173 @@
+{
+  "conditions": "Local mock, cold browser cache, 150ms emulated latency, 4Mbps down, 250ms extra API delay; raw HTML without HTTP compression",
+  "results": [
+    {
+      "width": 390,
+      "overflow": false,
+      "marks": [
+        {
+          "name": "navdesk-shell-ready",
+          "ms": 253
+        },
+        {
+          "name": "navdesk-content-ready",
+          "ms": 460
+        }
+      ],
+      "paint": [
+        {
+          "name": "first-paint",
+          "ms": 244
+        },
+        {
+          "name": "first-contentful-paint",
+          "ms": 244
+        }
+      ],
+      "apiRequests": 1,
+      "lazyRequests": 0,
+      "firstIconMs": null,
+      "editorInDOM": false
+    },
+    {
+      "width": 390,
+      "overflow": false,
+      "marks": [
+        {
+          "name": "navdesk-shell-ready",
+          "ms": 248
+        },
+        {
+          "name": "navdesk-content-ready",
+          "ms": 455
+        }
+      ],
+      "paint": [
+        {
+          "name": "first-paint",
+          "ms": 232
+        },
+        {
+          "name": "first-contentful-paint",
+          "ms": 232
+        }
+      ],
+      "apiRequests": 1,
+      "lazyRequests": 0,
+      "firstIconMs": null,
+      "editorInDOM": false
+    },
+    {
+      "width": 390,
+      "overflow": false,
+      "marks": [
+        {
+          "name": "navdesk-shell-ready",
+          "ms": 246
+        },
+        {
+          "name": "navdesk-content-ready",
+          "ms": 465
+        }
+      ],
+      "paint": [
+        {
+          "name": "first-paint",
+          "ms": 236
+        },
+        {
+          "name": "first-contentful-paint",
+          "ms": 236
+        }
+      ],
+      "apiRequests": 1,
+      "lazyRequests": 0,
+      "firstIconMs": null,
+      "editorInDOM": false
+    },
+    {
+      "width": 1365,
+      "overflow": false,
+      "marks": [
+        {
+          "name": "navdesk-shell-ready",
+          "ms": 248
+        },
+        {
+          "name": "navdesk-content-ready",
+          "ms": 444
+        }
+      ],
+      "paint": [
+        {
+          "name": "first-paint",
+          "ms": 248
+        },
+        {
+          "name": "first-contentful-paint",
+          "ms": 248
+        }
+      ],
+      "apiRequests": 1,
+      "lazyRequests": 0,
+      "firstIconMs": null,
+      "editorInDOM": false
+    },
+    {
+      "width": 1365,
+      "overflow": false,
+      "marks": [
+        {
+          "name": "navdesk-shell-ready",
+          "ms": 246
+        },
+        {
+          "name": "navdesk-content-ready",
+          "ms": 447
+        }
+      ],
+      "paint": [
+        {
+          "name": "first-paint",
+          "ms": 236
+        },
+        {
+          "name": "first-contentful-paint",
+          "ms": 236
+        }
+      ],
+      "apiRequests": 1,
+      "lazyRequests": 0,
+      "firstIconMs": null,
+      "editorInDOM": false
+    },
+    {
+      "width": 1365,
+      "overflow": false,
+      "marks": [
+        {
+          "name": "navdesk-shell-ready",
+          "ms": 242
+        },
+        {
+          "name": "navdesk-content-ready",
+          "ms": 439
+        }
+      ],
+      "paint": [
+        {
+          "name": "first-paint",
+          "ms": 252
+        },
+        {
+          "name": "first-contentful-paint",
+          "ms": 252
+        }
+      ],
+      "apiRequests": 1,
+      "lazyRequests": 0,
+      "firstIconMs": null,
+      "editorInDOM": false
+    }
+  ]
+}

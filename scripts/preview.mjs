@@ -1,5 +1,9 @@
 // LOCAL TEST SERVER ONLY. Mock data/auth; never connects to EdgeOne or Blob.
 import http from 'node:http';
+import {loadHolidays} from '../edge-functions/_holidays.js';
+import {loadTerms} from '../edge-functions/_calendar.js';
+const termCache=new Map();
+import {sanitise} from '../edge-functions/_navigation-model.js';
 import {demoNavigation} from './demo-data.mjs';
 import {readFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
@@ -20,8 +24,15 @@ const server = http.createServer(async (req,res) => {
       const chunks=[];for await(const part of req)chunks.push(part);const raw=Buffer.concat(chunks).toString();
       if(url.pathname==='/api/auth/login')return JSON.parse(raw).password==='demo'?respond(200,{ok:true},{'Set-Cookie':'navdesk_demo=1; Path=/; HttpOnly; SameSite=Strict'}):respond(401,{error:'密码不正确'});
       if(url.pathname==='/api/auth/logout')return respond(200,{ok:true},{'Set-Cookie':'navdesk_demo=; Path=/; Max-Age=0'});
+      if(url.pathname==='/api/calendar'){
+        if(!req.headers.cookie?.includes('navdesk_demo=1'))return respond(401,{});
+        const year=Number(url.searchParams.get('year'));if(!Number.isInteger(year)||year<1901||year>2100)return respond(400,{});
+        if(url.searchParams.get('kind')==='holidays'){try{return respond(200,await loadHolidays(year))}catch(error){return respond(503,{error:error.message})}}
+        try{if(!termCache.has(year))termCache.set(year,await loadTerms(year));return respond(200,{year,terms:termCache.get(year)})}catch{return respond(503,{error:'Solar terms unavailable'})}
+      }
       if(url.pathname==='/api/icons'){
         if(!req.headers.cookie?.includes('navdesk_demo=1'))return respond(401,{});
+        if(req.method==='POST')return respond(200,{ok:true});
         await new Promise(resolve=>setTimeout(resolve,400));
         const host=new URL(url.searchParams.get('url')).hostname;
         const initial=host.replace(/^(www|chat|dash|mail|docs|open)\./,'')[0].toUpperCase().replace(/[^A-Z0-9]/g,'N');
@@ -34,13 +45,14 @@ const server = http.createServer(async (req,res) => {
       if(delay)await new Promise(resolve=>setTimeout(resolve,delay));
       if(mode==='error')return respond(503,{error:'模拟服务故障'});
       if(mode==='unauthorized'||!req.headers.cookie?.includes('navdesk_demo=1'))return respond(401,{error:'Unauthorized'});
-      if(req.method==='PUT')navigation=JSON.parse(raw);
+      if(req.method==='PUT'){const input=JSON.parse(raw);if(input.updatedAt&&navigation.updatedAt&&input.updatedAt!==navigation.updatedAt)return respond(409,{error:'数据已更新，请刷新后重试'});try{navigation=sanitise({...input,trash:input.trash??navigation.trash??[]})}catch(error){return respond(400,{error:error.message})}}
+      if(req.method==='GET'&&url.searchParams.get('view')==='list'){const {trash,...visible}=navigation;return respond(200,visible)}
       return respond(200,navigation);
     }
     const path=url.pathname==='/'?'index.html':url.pathname==='/admin/'?'admin/index.html':url.pathname.slice(1);
-    if(!['index.html','admin/index.html','favicon.svg','site.webmanifest'].includes(path))return respond(404,{});
+    if(!['index.html','admin/index.html','favicon.svg','site.webmanifest'].includes(path)&&!/^(manage|model|calendar|navschema|dialogs|recovery|editor)\.[a-f0-9]{12}\.mjs$/.test(path))return respond(404,{});
     const body=await readFile(`${root}/${path}`);
-    res.writeHead(200,{'Content-Type':path.endsWith('.html')?'text/html; charset=utf-8':path.endsWith('.svg')?'image/svg+xml':'application/manifest+json'});res.end(body);
+    res.writeHead(200,{'Content-Type':path.endsWith('.mjs')?'text/javascript; charset=utf-8':path.endsWith('.html')?'text/html; charset=utf-8':path.endsWith('.svg')?'image/svg+xml':'application/manifest+json'});res.end(body);
   }catch{respond(500,{error:'Local preview error'})}
 });
 server.listen(8766,'127.0.0.1',()=>console.log('Local mock preview: http://127.0.0.1:8766/ — demo password: demo; no production data'));

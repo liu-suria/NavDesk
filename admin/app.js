@@ -1,6 +1,6 @@
 const $ = (selector, root = document) => root.querySelector(selector);
 let data = { version: 1, groups: [] };
-let editorState = null;
+let editorState = null, savedData=null;
 const groupsRoot = $("#groups"), dialog = $("#editor"), fields = $("#editorFields");
 
 function uid() { return crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`; }
@@ -18,11 +18,16 @@ function setBrand(settings = {}) {
 async function save() {
   const button = $("#saveButton"); if (button) { button.disabled = true; button.textContent = "保存中…"; }
   try { data = await request("/api/navigation", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }); render(); }
-  catch (error) { alert(error.message); }
+  catch (error) { if(savedData){data=structuredClone(savedData);render()} alert(error.message); }
   finally { if (button) { button.disabled = false; button.textContent = "保存"; } }
 }
 
+const navigationPort=createNavigationPort({get:()=>data,show:value=>{data=value;render()},request});
+const pinPort=createPinPort({storage:{getItem:key=>localStorage.getItem(key),setItem:(key,value)=>localStorage.setItem(key,value)}});
+const openNavManager=createManagerLoader({navigation:navigationPort,pins:pinPort,icons:window.navdeskIcons,notify:message=>alert(message)});
+$("#manageNav").onclick=()=>openNavManager("batch");
 function render() {
+  savedData=structuredClone(data);
   setBrand(data.settings);
   groupsRoot.replaceChildren(); const links = data.groups.reduce((total, group) => total + group.links.length, 0);
   $("#summary").textContent = `${data.groups.length} 个分组 · ${links} 个链接`;
@@ -49,14 +54,14 @@ function groupAction(action, groupIndex) {
   const group = data.groups[groupIndex];
   if (action === "add-link") return openLink(groupIndex);
   if (action === "edit-group") return openGroup(groupIndex);
-  if (action === "remove-group") { if (!confirm(`删除“${group.name}”及其中 ${group.links.length} 个链接？`)) return; data.groups.splice(groupIndex, 1); return save(); }
+  if (action === "remove-group") return openNavManager("deleteGroup",{groupId:group.id});
   if (action === "move-up" && move(data.groups, groupIndex, -1)) return save();
   if (action === "move-down" && move(data.groups, groupIndex, 1)) return save();
 }
 function linkAction(action, groupIndex, linkIndex) {
   const links = data.groups[groupIndex].links;
   if (action === "edit-link") return openLink(groupIndex, linkIndex);
-  if (action === "remove-link") { if (!confirm(`删除“${links[linkIndex].name}”？`)) return; links.splice(linkIndex, 1); return save(); }
+  if (action === "remove-link") return openNavManager("delete",{groupId:data.groups[groupIndex].id,linkId:links[linkIndex].id});
   if (action === "move-link-up" && move(links, linkIndex, -1)) return save();
   if (action === "move-link-down" && move(links, linkIndex, 1)) return save();
 }
@@ -100,8 +105,10 @@ $("#editorForm").onsubmit = async (event) => {
     if (!brandName) return;
     data.settings = { ...(data.settings || {}), brandName };
   } else {
-    const link = { id: editorState.index === undefined ? uid() : data.groups[editorState.groupIndex].links[editorState.index].id, name: String(form.get("name") || "").trim(), url: String(form.get("url") || "").trim(), description: String(form.get("description") || "").trim(), icon: String(form.get("icon") || "").trim(), openInNew: form.get("openInNew") === "on" };
+    const link = { ...(editorState.index===undefined?{}:data.groups[editorState.groupIndex].links[editorState.index]), id: editorState.index === undefined ? uid() : data.groups[editorState.groupIndex].links[editorState.index].id, name: String(form.get("name") || "").trim(), url: String(form.get("url") || "").trim(), description: String(form.get("description") || "").trim(), icon: String(form.get("icon") || "").trim(), openInNew: form.get("openInNew") === "on" };
     try { const url = new URL(link.url); if (!/^https?:$/.test(url.protocol)) throw new Error(); } catch { alert("请输入有效的 http 或 https 网址"); return; }
+    const key=value=>{const u=new URL(value);for(const k of [...u.searchParams.keys()])if(/^utm_/i.test(k)||/^(fbclid|gclid)$/i.test(k))u.searchParams.delete(k);return u.href};
+    if(data.groups.some((g,gi)=>g.links.some((l,li)=>!(gi===editorState.groupIndex&&li===editorState.index)&&key(l.url)===key(link.url)))){alert('相同网址已存在');return}
     if (!link.name) return; const list = data.groups[editorState.groupIndex].links; editorState.index === undefined ? list.push(link) : list.splice(editorState.index, 1, link);
   }
   dialog.close(); await save();
@@ -116,7 +123,7 @@ $("#addGroupButton").onclick = () => openGroup(); $("#addLinkButton").onclick = 
 $("#themeButton").onclick = () => setTheme(document.documentElement.dataset.theme === "light" ? "dark" : "light");
 $("#logoutButton").onclick = async () => { await request("/api/auth/logout", { method: "POST" }); location.reload(); };
 $("#exportButton").onclick = () => { const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `navdesk-${new Date().toISOString().slice(0, 10)}.json`; a.click(); URL.revokeObjectURL(url); };
-$("#importButton").onclick = () => $("#fileInput").click(); $("#fileInput").onchange = async (event) => { const file = event.target.files[0]; if (!file) return; try { const imported = JSON.parse(await file.text()); if (!Array.isArray(imported.groups)) throw new Error(); if (!confirm("导入将替换当前所有分组和链接，继续吗？")) return; data = imported; await save(); } catch { alert("这不是可用的 NavDesk JSON 备份文件"); } finally { event.target.value = ""; } };
+$("#importButton").onclick = () => $("#fileInput").click(); $("#fileInput").onchange = async (event) => { const file = event.target.files[0]; if (!file) return; try { const imported = JSON.parse(await file.text()); if (!Array.isArray(imported.groups)) throw new Error(); if (!confirm("导入将替换当前所有分组和链接，继续吗？")) return; data = {...imported,updatedAt:data.updatedAt,trash:imported.trash??data.trash??[]}; await save(); } catch { alert("这不是可用的 NavDesk JSON 备份文件"); } finally { event.target.value = ""; } };
 
 async function initialise(first = false) {
   $("#bootScreen").hidden = false;

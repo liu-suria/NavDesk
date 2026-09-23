@@ -1,0 +1,14 @@
+  <dialog id="quickEditor" class="quick-editor">
+    <form id="quickForm">
+      <header><div><p id="quickCategory"></p><h2 id="quickTitle">添加网址</h2></div><button type="button" data-quick-close aria-label="关闭">×</button></header>
+      <label>名称<input name="name" maxlength="80" required autocomplete="off"></label>
+      <label>网址<input name="url" type="url" required placeholder="https://" autocomplete="url"></label>
+      <label>备注<input name="description" maxlength="160"></label>
+      <details><summary>图标设置</summary><label>自定义图标地址<input name="icon" type="url" placeholder="留空自动获取并缓存"></label></details>
+      <label class="quick-check"><input name="openInNew" type="checkbox" checked>在新窗口打开</label>
+      <p id="quickMessage" role="status"></p><button type="button" id="quickCompare" hidden>查看最新值并合并</button><pre id="quickLatest" hidden></pre><button type="button" id="quickAcceptLatest" hidden>以此版本为基础，保留我的输入</button>
+      <footer><button type="button" data-quick-close>取消</button><button type="submit" class="primary" id="quickSave">保存</button></footer>
+    </form>
+  </dialog>
+  <div id="linkMenu" class="link-menu" role="menu" hidden><button role="menuitem" data-menu="open">打开</button><button role="menuitem" data-menu="edit">编辑</button><button role="menuitem" data-menu="pin">置顶 / 取消置顶</button><button role="menuitem" data-menu="move">移动到分类</button><button role="menuitem" data-menu="refresh">刷新图标</button><button role="menuitem" data-menu="delete" class="danger">删除</button></div>
+  <dialog id="sortEditor" class="quick-editor"><header><div><p>调整显示顺序</p><h2 id="sortTitle">排序</h2></div><button type="button" id="sortClose" aria-label="关闭排序">×</button></header><div id="sortList"></div><p id="sortMessage" role="status"></p><footer><button type="button" id="sortCancel">取消</button><button type="button" class="primary" id="sortSave">保存排序</button></footer></dialog>

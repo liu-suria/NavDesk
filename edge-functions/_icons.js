@@ -4,11 +4,11 @@ export function iconHost(value) {
   if (!/^[a-z0-9.-]+\.[a-z]{2,63}$/.test(host) || /\.(local|localhost|internal|lan|test|invalid)$/.test(host)) throw new Error('Unsupported host');
   return host;
 }
-export async function loadIcon(store, host, fetcher = fetch, now = Date.now()) {
+export async function loadIcon(store, host, fetcher = fetch, now = Date.now(), force = false) {
   const key = `icons/v1/${host}.json`;
   let cached;
   try { cached = await store.get(key, {type:'json'}); } catch {}
-  if (cached?.expires > now) return cached;
+  if (!force && cached?.expires > now) return cached;
   try {
     // Fixed upstream only: never fetch arbitrary user URLs or internal network addresses.
     const response = await fetcher(`https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=64`, {redirect:'follow', signal:AbortSignal.timeout(5000)});
@@ -23,7 +23,7 @@ export async function loadIcon(store, host, fetcher = fetch, now = Date.now()) {
     let binary = ''; for(const byte of bytes) binary += String.fromCharCode(byte);
     cached = {type,body:btoa(binary),expires:now+30*DAY};
   } catch {
-    if (cached?.body) return cached;
+    if (cached?.body) return force?{...cached,refreshFailed:true}:cached;
     cached = {body:null,expires:now+3600000};
   }
   try { await store.setJSON(key,cached); } catch { /* A cache write must not hide a valid icon. */ }

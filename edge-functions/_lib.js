@@ -77,7 +77,7 @@ export async function requireAuth(context) {
 
 export async function readJson(request) {
   const text = await request.text();
-  if (text.length > 250000) throw new Error("Request body is too large");
+  if (text.length > 2000000) throw new Error("Request body is too large");
   try {
     const value = JSON.parse(text || "{}");
     if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error();

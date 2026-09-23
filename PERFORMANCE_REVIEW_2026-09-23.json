@@ -1,0 +1,362 @@
+{
+  "url": "https://nav.667989.xyz/",
+  "date": "2026-09-23T10:31:41.024Z",
+  "scope": "Read-only existing production version; authenticated navigation path (31 tiles; login hidden); single samples, not SLA. Local changes are not deployed.",
+  "cold": {
+    "marks": [
+      {
+        "name": "navdesk-shell-ready",
+        "ms": 778
+      },
+      {
+        "name": "navdesk-content-ready",
+        "ms": 1535
+      }
+    ],
+    "navigation": [
+      {
+        "ttfbMs": 741,
+        "domMs": 932,
+        "loadMs": 933,
+        "transferBytes": 14355
+      }
+    ],
+    "resources": [
+      {
+        "path": "/api/navigation",
+        "durationMs": 766,
+        "bytes": 5302
+      },
+      {
+        "path": "/site.webmanifest",
+        "durationMs": 266,
+        "bytes": 558
+      },
+      {
+        "path": "/favicon.svg",
+        "durationMs": 5,
+        "bytes": 0
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 669,
+        "bytes": 300
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 659,
+        "bytes": 300
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 746,
+        "bytes": 300
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 763,
+        "bytes": 300
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 574,
+        "bytes": 300
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 514,
+        "bytes": 300
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 428,
+        "bytes": 300
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 568,
+        "bytes": 300
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 482,
+        "bytes": 300
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 495,
+        "bytes": 300
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 436,
+        "bytes": 300
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 428,
+        "bytes": 300
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 509,
+        "bytes": 300
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 422,
+        "bytes": 300
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 495,
+        "bytes": 300
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 441,
+        "bytes": 300
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 470,
+        "bytes": 300
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 482,
+        "bytes": 300
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 408,
+        "bytes": 300
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 465,
+        "bytes": 300
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 400,
+        "bytes": 300
+      }
+    ]
+  },
+  "repeat": {
+    "marks": [
+      {
+        "name": "navdesk-shell-ready",
+        "ms": 191
+      },
+      {
+        "name": "navdesk-content-ready",
+        "ms": 720
+      }
+    ],
+    "navigation": [
+      {
+        "ttfbMs": 136,
+        "domMs": 194,
+        "loadMs": 212,
+        "transferBytes": 300
+      }
+    ],
+    "resources": [
+      {
+        "path": "/api/navigation",
+        "durationMs": 508,
+        "bytes": 5302
+      },
+      {
+        "path": "/site.webmanifest",
+        "durationMs": 6,
+        "bytes": 0
+      },
+      {
+        "path": "/favicon.svg",
+        "durationMs": 1,
+        "bytes": 0
+      },
+      {
+        "path": "/favicon.svg",
+        "durationMs": 2,
+        "bytes": 0
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 13,
+        "bytes": 0
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 13,
+        "bytes": 0
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 2,
+        "bytes": 0
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 2,
+        "bytes": 0
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 1,
+        "bytes": 0
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 2,
+        "bytes": 0
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 1,
+        "bytes": 0
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 1,
+        "bytes": 0
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 1,
+        "bytes": 0
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 2,
+        "bytes": 0
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 2,
+        "bytes": 0
+      }
+    ]
+  },
+  "simulatedWeak": {
+    "marks": [
+      {
+        "name": "navdesk-shell-ready",
+        "ms": 172
+      },
+      {
+        "name": "navdesk-content-ready",
+        "ms": 1311
+      }
+    ],
+    "navigation": [
+      {
+        "ttfbMs": 125,
+        "domMs": 172,
+        "loadMs": 174,
+        "transferBytes": 300
+      }
+    ],
+    "resources": [
+      {
+        "path": "/api/navigation",
+        "durationMs": 1127,
+        "bytes": 5302
+      },
+      {
+        "path": "/site.webmanifest",
+        "durationMs": 4,
+        "bytes": 0
+      },
+      {
+        "path": "/favicon.svg",
+        "durationMs": 3,
+        "bytes": 0
+      },
+      {
+        "path": "/favicon.svg",
+        "durationMs": 3,
+        "bytes": 0
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 1,
+        "bytes": 0
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 1,
+        "bytes": 0
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 1,
+        "bytes": 0
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 2,
+        "bytes": 0
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 2,
+        "bytes": 0
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 4,
+        "bytes": 0
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 1,
+        "bytes": 0
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 1,
+        "bytes": 0
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 0,
+        "bytes": 0
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 0,
+        "bytes": 0
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 0,
+        "bytes": 0
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 1,
+        "bytes": 0
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 1,
+        "bytes": 0
+      },
+      {
+        "path": "/api/icons",
+        "durationMs": 1,
+        "bytes": 0
+      }
+    ]
+  },
+  "simulatedWeakConditions": {
+    "latencyMs": 150,
+    "downloadBytesPerSecond": 200000,
+    "uploadBytesPerSecond": 100000,
+    "cache": "warm; browser CDP emulation"
+  }
+}

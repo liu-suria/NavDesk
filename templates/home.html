@@ -15,7 +15,7 @@
 <body class="app-shell">
   <main class="container" id="app">
     <header class="topbar">
-      <a class="brand" href="/"><span class="brand-mark" id="brandMark">N</span><span id="brandName">NavDesk</span></a>
+      <button type="button" id="calendarButton" class="brand browser-clock" aria-label="打开万年历，查看放假与调休" aria-haspopup="dialog" title="点击查看万年历"><time id="clock" class="clock"><span id="clockDate"></span><span id="clockLunar"></span><span id="clockTime"></span></time></button>
       <form class="web-search" id="webSearchForm" role="search">
         <label class="sr-only" for="searchEngine">搜索引擎</label>
         <select id="searchEngine" aria-label="选择搜索引擎">
@@ -24,36 +24,27 @@
           <option value="baidu">百度</option>
           <option value="duckduckgo">DuckDuckGo</option>
         </select>
-        <input id="searchInput" type="search" autocomplete="off" placeholder="搜索互联网…" aria-label="搜索关键词" />
+        <input id="searchInput" type="search" autocomplete="off" placeholder="搜索收藏的网址…" aria-label="搜索关键词" />
         <button type="submit" aria-label="搜索">⌕</button>
       </form>
-      <div class="top-actions"><span id="clock" class="clock"></span><button class="icon-button" id="sortGroups" type="button" title="调整分类顺序" aria-label="调整分类顺序">↕</button><button class="icon-button" id="themeButton" title="切换主题">◐</button><a class="admin-link" href="/admin/">管理</a></div>
+      <div class="top-actions"><button type="button" class="icon-button desktop-only" id="manageNav" title="批量添加、导入、回收站与检查">整理网址</button><button class="icon-button" id="sortGroups" type="button" title="分类管理：添加、删除、排序" aria-label="分类管理">↕</button><button class="icon-button" id="themeButton" title="切换主题">◐</button></div>
     </header>
     <div class="boot-screen" id="bootScreen" role="status"><span class="brand-mark">N</span><span id="bootMessage">正在打开导航…</span><button class="icon-button" id="retryButton" hidden>重新加载</button></div>
+    <div id="localSearchStatus" class="search-status" hidden><span id="localSearchCount"></span><button id="clearLocalSearch" type="button">清空</button><button id="searchWeb" type="button">搜索互联网 ↗</button></div>
     <div class="workspace-layout">
       <aside class="category-rail" id="categoryRail" aria-label="分类快速跳转"></aside>
-      <section id="navigation" class="navigation" aria-live="polite"></section>
+      <div class="navigation-column">
+        <section id="pinnedSection" class="nav-group pinned-section" hidden><div class="group-heading"><span class="group-icon">★</span><h2>常用置顶</h2><div class="group-actions"><button class="group-sort desktop-only" id="sortPinned" aria-label="调整置顶顺序" title="调整置顶顺序（本浏览器）">↕</button></div><span class="count" id="pinnedCount"></span></div><div id="pinnedCards" class="cards"></div></section>
+        <section id="navigation" class="navigation" aria-live="polite"></section>
+      </div>
     </div>
   </main>
   <section class="login-screen" id="loginScreen" hidden>
     <div class="login-card"><span class="brand-mark large" id="loginBrandMark">N</span><p class="eyebrow">PRIVATE NAVIGATION</p><h1>你的个人导航台</h1><p>输入密码，进入仅属于你的工作空间。</p><form id="loginForm"><input id="password" type="password" autocomplete="current-password" placeholder="请输入密码" required /><button class="primary" type="submit">进入 <span id="loginBrandName">NavDesk</span> <span>→</span></button><p class="form-message" id="loginMessage"></p></form></div>
   </section>
   <template id="groupTemplate"><section class="nav-group"><div class="group-heading"><span class="group-icon"></span><h2></h2><div class="group-actions"><button class="group-add" type="button" title="添加网址" aria-label="添加网址">＋</button><button class="group-sort" type="button" title="调整网址顺序" aria-label="调整网址顺序">↕</button></div><span class="count"></span></div><div class="cards"></div></section></template>
-  <dialog id="quickEditor" class="quick-editor">
-    <form id="quickForm">
-      <header><div><p id="quickCategory"></p><h2 id="quickTitle">添加网址</h2></div><button type="button" data-quick-close aria-label="关闭">×</button></header>
-      <label>名称<input name="name" maxlength="80" required autocomplete="off"></label>
-      <label>网址<input name="url" type="url" required placeholder="https://" autocomplete="url"></label>
-      <label>备注<input name="description" maxlength="160"></label>
-      <details><summary>图标设置</summary><label>自定义图标地址<input name="icon" type="url" placeholder="留空自动获取并缓存"></label></details>
-      <label class="quick-check"><input name="openInNew" type="checkbox" checked>在新窗口打开</label>
-      <p id="quickMessage" role="status"></p>
-      <footer><button type="button" data-quick-close>取消</button><button type="submit" class="primary" id="quickSave">保存</button></footer>
-    </form>
-  </dialog>
-  <div id="linkMenu" class="link-menu" role="menu" hidden><button role="menuitem" data-menu="open">打开</button><button role="menuitem" data-menu="edit">编辑</button><button role="menuitem" data-menu="delete" class="danger">删除</button></div>
-  <dialog id="sortEditor" class="quick-editor"><header><div><p>调整显示顺序</p><h2 id="sortTitle">排序</h2></div><button type="button" id="sortClose" aria-label="关闭排序">×</button></header><div id="sortList"></div><p id="sortMessage" role="status"></p><footer><button type="button" id="sortCancel">取消</button><button type="button" class="primary" id="sortSave">保存排序</button></footer></dialog>
   <p id="pageMessage" class="page-message" role="status" hidden></p>
+  <button id="backToTop" class="back-to-top" aria-label="回到顶部" hidden>↑</button>
   <!-- APP -->
 <noscript><p>请启用 JavaScript 以登录并读取私有导航。</p></noscript>
 </body>

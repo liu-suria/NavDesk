@@ -7,3 +7,9 @@ test('failed icons have a negative cache and never block navigation',async()=>{c
 test('rejects HTML and oversize responses',async()=>{for(const [type,body] of [['text/html','oops'],['image/png',new Uint8Array(65537)]]){const icon=await loadIcon(store(),'example.com',async()=>new Response(body,{headers:{'Content-Type':type}}));assert.equal(icon.body,null)}});
 test('expired icon survives upstream outage',async()=>{const s=store();s.data.set('icons/v1/example.com.json',{body:'AQID',type:'image/png',expires:1});assert.equal((await loadIcon(s,'example.com',async()=>{throw Error()},100)).body,'AQID')});
 test('host normalization and rejection',()=>{assert.equal(iconHost('https://example.com/private?q=secret'),'example.com');for(const value of ['http://127.0.0.1','http://[::1]','http://router.local','http://localhost','not-url'])assert.throws(()=>iconHost(value))});
+test('manual refresh bypasses fresh cache and retains last valid icon on failure',async()=>{
+ const s=store();s.data.set('icons/v1/example.com.json',{body:'AQID',type:'image/png',expires:999999});let calls=0;
+ const fetcher=async()=>{calls++;return new Response(new Uint8Array([4,5,6]),{headers:{'Content-Type':'image/png'}})};
+ assert.equal((await loadIcon(s,'example.com',fetcher,200,true)).body,'BAUG');assert.equal(calls,1);
+ assert.equal((await loadIcon(s,'example.com',async()=>{throw Error('offline')},300,true)).body,'BAUG');
+});
