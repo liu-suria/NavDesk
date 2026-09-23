@@ -13,7 +13,7 @@ window.navdeskBoot = (() => {
     try {
       const response = await fetch(url, { credentials: 'same-origin', cache: 'no-store', ...options, signal: controller.signal });
       const data = await response.json().catch(() => ({}));
-      if(response.status===401&&allowRecovery&&!renewed&&!url.startsWith('/api/auth/')){const {recover}=await import('/recovery.8961cd6f23ab.mjs');if(await recover(request))return request(url,options,true,allowRecovery)}
+      if(response.status===401&&allowRecovery&&!renewed&&!url.startsWith('/api/auth/')){const {recover}=await import('/recovery.99cafc6a2873.mjs');if(await recover(request))return request(url,options,true,allowRecovery)}
       if (!response.ok) {
         const error = new Error(response.status === 401 ? '登录已失效，请重新输入密码。' : data.error || `请求失败 (${response.status})`);
         error.status = response.status;
@@ -104,7 +104,7 @@ function createManagerLoader(services){
  return async(action,payload)=>{
   if(matchMedia('(max-width:650px)').matches||opening)return;
   opening=true;
-  try{manager ||= import('/manage.61bfa710ae06.mjs').then(module=>module.createManager(services)).catch(error=>{manager=null;throw error});await (await manager).open(action,payload)}
+  try{manager ||= import('/manage.6d289c7ccc40.mjs').then(module=>module.createManager(services)).catch(error=>{manager=null;throw error});await (await manager).open(action,payload)}
   catch(error){services.notify(error.message||'整理工具加载失败，请重试')}
   finally{opening=false}
  };

@@ -1,4 +1,5 @@
-import {sanitise} from './navschema.b698f9291395.mjs';
+// NavDesk JavaScript module v2
+import {sanitise} from './navschema.b901af2bea08.mjs';
 // Shared data operations. No network, DOM, or production writes.
 export function canonical(value){
  const u=new URL(value);if(!/^https?:$/.test(u.protocol)||u.username||u.password)throw Error('只支持不含账号密码的 HTTP/HTTPS 网址');

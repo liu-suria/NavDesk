@@ -15,7 +15,7 @@ window.navdeskBoot = (() => {
     try {
       const response = await fetch(url, { credentials: 'same-origin', cache: 'no-store', ...options, signal: controller.signal });
       const data = await response.json().catch(() => ({}));
-      if(response.status===401&&allowRecovery&&!renewed&&!url.startsWith('/api/auth/')){const {recover}=await import('/recovery.8961cd6f23ab.mjs');if(await recover(request))return request(url,options,true,allowRecovery)}
+      if(response.status===401&&allowRecovery&&!renewed&&!url.startsWith('/api/auth/')){const {recover}=await import('/recovery.99cafc6a2873.mjs');if(await recover(request))return request(url,options,true,allowRecovery)}
       if (!response.ok) {
         const error = new Error(response.status === 401 ? '登录已失效，请重新输入密码。' : data.error || `请求失败 (${response.status})`);
         error.status = response.status;
@@ -131,7 +131,7 @@ function createManagerLoader(services){
  return async(action,payload)=>{
   if(matchMedia('(max-width:650px)').matches||opening)return;
   opening=true;
-  try{manager ||= import('/manage.61bfa710ae06.mjs').then(module=>module.createManager(services)).catch(error=>{manager=null;throw error});await (await manager).open(action,payload)}
+  try{manager ||= import('/manage.6d289c7ccc40.mjs').then(module=>module.createManager(services)).catch(error=>{manager=null;throw error});await (await manager).open(action,payload)}
   catch(error){services.notify(error.message||'整理工具加载失败，请重试')}
   finally{opening=false}
  };
@@ -337,13 +337,13 @@ let editorPromise;
 async function runEditor(action,...args){
  if(isMobileNavigation())return;
  try{
-  editorPromise ||= import('/editor.389fdf1deed8.mjs').then(module=>module.install({...services,openManager:openNavManager})).catch(error=>{editorPromise=null;throw error});
+  editorPromise ||= import('/editor.da9271b6ab44.mjs').then(module=>module.install({...services,openManager:openNavManager})).catch(error=>{editorPromise=null;throw error});
   const editor=await editorPromise;if(!isMobileNavigation())editor[action](...args);
  }catch{pageMessage('编辑工具加载失败，请重试')}
 }
 $('#sortGroups').onclick=()=>openNavManager('categories');
 $('#sortPinned').onclick=()=>runEditor('openSort','__pinned');
-$('#calendarButton').onclick=async()=>{const button=$('#calendarButton');button.disabled=true;try{const calendar=await import('/calendar.75f32c9f590c.mjs');calendar.open()}catch{pageMessage('日历加载失败，请稍后重试')}finally{button.disabled=false}};
+$('#calendarButton').onclick=async()=>{const button=$('#calendarButton');button.disabled=true;try{const calendar=await import('/calendar.cdc407a4b7a9.mjs');calendar.open()}catch{pageMessage('日历加载失败，请稍后重试')}finally{button.disabled=false}};
 
 const backTop=$('#backToTop');window.addEventListener('scroll',()=>{backTop.hidden=scrollY<500},{passive:true});backTop.onclick=()=>window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'instant':'smooth'});
 </script>

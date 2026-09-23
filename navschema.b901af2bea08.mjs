@@ -1,3 +1,4 @@
+// NavDesk JavaScript module v2
 const DEFAULT_COLOR = "#6d7cff";
 const cleanText = (value, length) => String(value || "").trim().slice(0, length);
 const cleanUrl = (value) => {

@@ -1,4 +1,5 @@
-import './dialogs.589f4f3e471f.mjs';
+// NavDesk JavaScript module v2
+import './dialogs.83efedf8180f.mjs';
 // Desktop editing is fetched only after an explicit action.
 export function install({navigation:nav,pins,icons,notify:pageMessage,openManager}){
  const $=selector=>document.querySelector(selector);
@@ -42,7 +43,7 @@ quickForm.onsubmit=async event=>{
     const canonical=value=>{const u=new URL(value);for(const k of [...u.searchParams.keys()])if(/^utm_/i.test(k)||/^(fbclid|gclid)$/i.test(k))u.searchParams.delete(k);return u.href};
     if(quickEditing.linkId){
       const index=group.links.findIndex(item=>item.id===quickEditing.linkId);
-      const {mergeEditedLink}=await import('/model.093a9d3634d3.mjs');
+      const {mergeEditedLink}=await import('/model.8ebbfa033d2f.mjs');
       group.links[index]=mergeEditedLink(JSON.parse(quickEditing.original),group.links[index],link);
     }else{link.id=crypto.randomUUID();group.links.push(link)}
     const effective=group.links.find(l=>l.id===(quickEditing.linkId||link.id));

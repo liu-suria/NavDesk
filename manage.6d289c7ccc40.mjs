@@ -1,5 +1,6 @@
-import './dialogs.589f4f3e471f.mjs';
-import * as model from './model.093a9d3634d3.mjs';
+// NavDesk JavaScript module v2
+import './dialogs.83efedf8180f.mjs';
+import * as model from './model.8ebbfa033d2f.mjs';
 export function parseBookmarks(text){
  const doc=new DOMParser().parseFromString(text,'text/html');
  const items=[...doc.querySelectorAll('a[href]')].map(a=>{let dl=a.closest('dl'),groupName='';while(dl){const sibling=dl.previousElementSibling;const heading=sibling?.matches('h3')?sibling:sibling?.querySelector('h3');if(heading){groupName=heading.textContent.trim();break}dl=dl.parentElement?.closest('dl')}return {name:a.textContent.trim(),url:a.getAttribute('href'),groupName}});

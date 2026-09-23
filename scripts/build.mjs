@@ -6,7 +6,7 @@ process.chdir(fileURLToPath(new URL('..', import.meta.url)));
 const read = name => readFileSync(name, 'utf8');
 const inlineJS = text => text.replace(/<\/script/gi, '<\\/script');
 const css = text => text.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ').replace(/\s*([{}:;,])\s*/g, '$1').trim();
-const asset=(name,text)=>{const path=`${name}.${createHash('sha256').update(text).digest('hex').slice(0,12)}.mjs`;writeFileSync(path,text);return path};
+const asset=(name,text)=>{text='// NavDesk JavaScript module v2\n'+text;const path=`${name}.${createHash('sha256').update(text).digest('hex').slice(0,12)}.mjs`;writeFileSync(path,text);return path};
 const uiURL=asset('dialogs',`const style=document.createElement('style');style.textContent=${JSON.stringify(css(read('interactions.css')))};document.head.append(style);`);
 const lazyStyle=text=>`import './${uiURL}';\n`+text;
 const recoveryURL=asset('recovery',lazyStyle(read('recovery.mjs')));
