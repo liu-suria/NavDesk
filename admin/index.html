@@ -2,10 +2,39 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NavDesk · 管理</title><link rel="stylesheet" href="/style.css?v=10" /><link rel="stylesheet" href="/admin/admin.css?v=7" />
+  <script>// Start the authenticated data request while the static page is still parsing.
+window.navdeskBoot = (() => {
+  const read = (key, fallback = null) => { try { return localStorage.getItem(key) ?? fallback; } catch { return fallback; } };
+  const write = (key, value) => { try { localStorage.setItem(key, value); } catch {} };
+  document.documentElement.dataset.theme = read('navdesk-theme') || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+  async function request(url, options = {}) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+    try {
+      const response = await fetch(url, { credentials: 'same-origin', cache: 'no-store', ...options, signal: controller.signal });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const error = new Error(response.status === 401 ? '登录已失效，请重新输入密码。' : data.error || `请求失败 (${response.status})`);
+        error.status = response.status;
+        throw error;
+      }
+      return data;
+    } catch (error) {
+      if (error.name === 'AbortError') throw new Error('请求超时，请稍后重试。');
+      throw error;
+    } finally { clearTimeout(timeout); }
+  }
+  // Handle rejection immediately, including failures before the page script runs.
+  const navigation = request('/api/navigation').then(data => ({ data }), error => ({ error }));
+  return { read, write, request, navigation };
+})();
+</script>
+  <style>[hidden]{display:none !important;}:root{color-scheme:dark;--bg:#201b20;--surface:rgba(48,39,47,0.78);--surface-solid:#342a33;--text:#fff8fa;--muted:#c3aeb8;--line:rgba(255,235,243,0.12);--accent:#e5a2b5;--accent-soft:rgba(229,162,181,0.16);--shadow:0 18px 50px rgba(29,14,21,0.25);font-family:Inter,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;}html[data-theme="light"]{color-scheme:light;--bg:#fcf8f9;--surface:rgba(255,255,255,0.84);--surface-solid:#fff;--text:#2b2329;--muted:#897a82;--line:rgba(97,63,77,0.12);--accent:#aa6d82;--accent-soft:rgba(170,109,130,0.11);--shadow:0 18px 46px rgba(109,71,86,0.10);}*{box-sizing:border-box;}body{margin:0;background:var(--bg);color:var(--text);min-height:100vh;}.app-shell{overflow-x:hidden;}.container{position:relative;max-width:1280px;margin:auto;padding:26px 42px 90px;}.boot-screen{min-height:calc(100vh - 150px);display:grid;place-content:center;justify-items:center;gap:12px;color:var(--muted);font-size:13px;}.boot-screen .brand-mark{width:42px;height:42px;border-radius:13px;font-size:21px;}.topbar{height:48px;display:flex;align-items:center;justify-content:space-between;}.brand{display:flex;align-items:center;gap:10px;color:var(--text);text-decoration:none;font-size:17px;font-weight:760;letter-spacing:-0.4px;}.brand-mark{width:29px;height:29px;display:grid;place-items:center;border-radius:9px;background:linear-gradient(135deg,#edc5ce 0%,#cc8fa1 100%);box-shadow:inset 0 1px rgba(255,255,255,0.25),0 4px 10px rgba(142,83,103,0.16);font-family:Georgia,serif;color:white;font-weight:bold;}.top-actions{display:flex;gap:10px;align-items:center;}.clock{font-size:13px;color:var(--muted);margin-right:9px;}.icon-button,.admin-link{border:1px solid var(--line);background:var(--surface);color:var(--text);height:34px;border-radius:10px;padding:0 12px;text-decoration:none;font:600 13px inherit;cursor:pointer;}.icon-button{font-size:18px;padding:0 10px;}.admin-link{display:inline-flex;align-items:center;justify-content:center;line-height:1;}.eyebrow{font-size:11px;letter-spacing:1.6px;color:var(--accent);font-weight:800;margin:0 0 14px;}.login-card h1{letter-spacing:-2.4px;font-size:42px;line-height:1.1;margin:0 0 14px;}.login-card > p:not(.eyebrow){margin:0;color:var(--muted);font-size:16px;}.navigation{display:grid;gap:38px;}.group-heading{display:flex;align-items:center;gap:10px;margin-bottom:14px;}.group-heading h2{font-size:16px;margin:0;letter-spacing:-0.3px;}.group-icon{display:grid;place-items:center;width:26px;height:26px;border-radius:8px;font-size:13px;}.count{font-size:11px;color:var(--muted);margin-left:1px;}.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;}.nav-card{background:var(--surface);border:1px solid var(--line);border-radius:15px;padding:16px;display:flex;gap:12px;align-items:center;min-width:0;text-decoration:none;color:var(--text);transition:0.18s transform,0.18s background,0.18s border-color;}.nav-card:hover{transform:translateY(-3px);background:var(--surface-solid);border-color:rgba(134,146,255,0.45);}.site-icon{flex:0 0 34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--accent-soft);overflow:hidden;color:var(--accent);}.site-icon img{width:20px;height:20px;object-fit:contain;}.card-copy{min-width:0;display:grid;gap:4px;}.card-copy strong{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.card-copy small{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.arrow{margin-left:auto;color:var(--muted);font-size:14px;}.empty{border:1px dashed var(--line);border-radius:18px;min-height:210px;text-align:center;display:grid;place-content:center;padding:30px;color:var(--muted);}.empty span{font-size:32px;color:var(--accent);}.empty h2{font-size:17px;color:var(--text);margin:9px 0;}.empty p{margin:0;}.empty a{color:var(--accent);margin-top:12px;font-size:14px;}.login-screen{position:fixed;inset:0;z-index:5;display:grid;place-items:center;padding:24px;background:var(--bg);}.login-card{width:min(100%,410px);background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:24px;padding:42px;}.brand-mark.large{width:42px;height:42px;border-radius:13px;font-size:22px;margin-bottom:32px;}.login-card h1{font-size:30px;margin-bottom:12px;}.login-card form{display:grid;gap:12px;margin-top:31px;}.login-card input{height:48px;border-radius:11px;border:1px solid var(--line);padding:0 14px;background:var(--bg);color:var(--text);font:14px inherit;outline:none;}.login-card input:focus{border-color:var(--accent);}.primary{height:48px;border:0;border-radius:11px;background:linear-gradient(135deg,#d894a7,#ad6d82);color:white;font:700 14px inherit;cursor:pointer;display:flex;justify-content:center;gap:8px;align-items:center;}.primary:disabled{opacity:0.6;}.form-message{min-height:18px;margin:1px 0 0;color:#ff8792;font-size:12px;}@media (max-width:900px){.cards{grid-template-columns:repeat(2,minmax(0,1fr));}}@media (max-width:600px){.container{padding:19px 18px 56px;}.clock{display:none;}.cards{grid-template-columns:1fr;}.navigation{gap:31px;}.login-card{padding:32px 25px;border-radius:20px;}}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}.container{max-width:1460px;padding:18px 32px 72px;}.topbar{position:sticky;top:0;z-index:4;height:68px;gap:24px;backdrop-filter:blur(16px);border-bottom:1px solid color-mix(in srgb,var(--line) 72%,transparent);}.web-search{height:42px;flex:1;max-width:680px;display:flex;align-items:center;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:var(--surface);box-shadow:0 7px 22px rgba(106,69,83,0.07);}.web-search:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}.web-search select,.web-search input,.web-search button{height:100%;border:0;background:transparent;color:var(--text);font:13px inherit;outline:0;}.web-search select{max-width:125px;padding:0 28px 0 13px;border-right:1px solid var(--line);color:var(--muted);cursor:pointer;}.web-search input{min-width:0;flex:1;padding:0 13px;}.web-search input::placeholder{color:var(--muted);}.web-search button{width:44px;font:27px/1 Georgia,serif;color:var(--muted);cursor:pointer;}.web-search button:hover{color:var(--accent);}.workspace-layout{display:grid;grid-template-columns:124px minmax(0,1fr);gap:24px;margin-top:22px;}.category-rail{position:sticky;top:91px;align-self:start;display:grid;gap:4px;max-height:calc(100vh - 110px);overflow:auto;padding:8px 0;}.category-rail a{display:flex;align-items:center;gap:8px;min-width:0;padding:7px 8px;color:var(--muted);border-radius:9px;text-decoration:none;font-size:12px;transition:0.16s background,0.16s color;}.category-rail a:hover{color:var(--text);background:var(--accent-soft);}.category-rail a span{width:22px;height:22px;display:grid;flex:0 0 22px;place-items:center;border-radius:7px;font-size:11px;}.category-rail b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:650;}.navigation{gap:12px;}.nav-group{scroll-margin-top:96px;}.group-heading{margin-bottom:10px;}.group-heading h2{font-size:15px;}.group-icon{width:24px;height:24px;border-radius:7px;}.cards{grid-template-columns:repeat(auto-fill,144px);gap:9px;justify-content:start;}.nav-card{min-height:70px;padding:10px;gap:9px;border-radius:12px;}.site-icon{flex-basis:30px;height:30px;border-radius:9px;}.site-icon img{width:18px;height:18px;}.card-copy{gap:2px;}.card-copy strong{font-size:12px;}.card-copy small{font-size:10px;}.arrow{display:none;}@media (max-width:960px){.container{padding-inline:24px;}.topbar{gap:16px;}.clock{display:none;}.cards{grid-template-columns:repeat(auto-fill,144px);}}@media (max-width:650px){.container{padding:0 15px calc(28px + env(safe-area-inset-bottom));}.topbar{position:static;height:auto;min-height:0;flex-wrap:wrap;gap:9px;padding:10px 0 12px;}.brand{min-width:0;flex:1 1 auto;}.brand #brandName{display:block !important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:16px;}.top-actions{margin-left:auto;}.admin-link{height:32px;padding:0 10px;}.web-search{position:static;order:3;flex:0 0 100%;max-width:none;height:54px;border-radius:16px;box-shadow:0 7px 22px rgba(106,69,83,0.07);}.web-search select{max-width:115px;padding-left:13px;font-size:14px;}.web-search input{padding-inline:14px;font-size:15px;}.web-search button{width:52px;font-size:31px;}.workspace-layout{display:block;margin-top:0;}.category-rail{position:sticky;top:0;z-index:3;display:flex;flex-wrap:wrap;align-items:center;gap:8px;max-height:none;overflow:visible;padding:10px 0 11px;background:var(--bg);}.category-rail a{flex:0 0 auto;min-height:38px;padding:7px 11px;gap:8px;border:1px solid var(--line);background:var(--surface);font-size:13px;}.category-rail a span{width:22px;height:22px;flex-basis:22px;font-size:11px;}.navigation{gap:12px;}.nav-group{scroll-margin-top:115px;}.cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}.nav-card{min-height:64px;padding:9px;}.card-copy strong{font-size:12px;}.card-copy small{display:none;}}body{background:radial-gradient(ellipse at top left,rgba(229,162,181,.08),transparent 65%),var(--bg)}.boot-screen{min-height:180px;padding:32px 0}.boot-screen:not([hidden]) ~ .workspace-layout{display:none}.site-icon{position:relative}.site-icon img{position:absolute}@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}@media(max-width:650px){.icon-button,.admin-link{min-width:44px;min-height:44px}.web-search input,.web-search select,.login-card input{font-size:16px}.topbar{backdrop-filter:none}}.admin-shell{background:var(--bg);min-height:100vh}.admin-topbar{height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 max(25px,calc((100vw - 1240px)/2));border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg) 82%,transparent);position:sticky;top:0;z-index:3;backdrop-filter:blur(15px)}.admin-actions,.toolbar-actions,.row-actions{display:flex;align-items:center;gap:8px}.back-link{font-size:13px;text-decoration:none;color:var(--muted);margin-right:5px}.minor-button,.row-actions button,.add-in-group{height:34px;border:1px solid var(--line);border-radius:9px;padding:0 11px;background:var(--surface);color:var(--text);font:600 12px inherit;cursor:pointer}.admin-main{max-width:1160px;padding:57px 26px 80px;margin:auto}.admin-hero{display:flex;justify-content:space-between;gap:25px;align-items:flex-end;margin-bottom:45px}.admin-hero h1{font-size:38px;letter-spacing:-1.8px;margin:0 0 11px}.admin-hero p:not(.eyebrow){color:var(--muted);margin:0}.add-link{min-width:120px}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:20px;background:var(--surface);padding:15px 18px;border:1px solid var(--line);border-radius:14px;margin-bottom:18px}.toolbar>div:first-child{display:grid;gap:4px}.toolbar strong{font-size:13px}.toolbar span{font-size:12px;color:var(--muted)}.admin-groups{display:grid;gap:16px}.manage-group{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}.manage-group-head{height:61px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid var(--line)}.group-label{display:flex;align-items:center;gap:10px}.group-name{font-size:15px}.link-count{font:11px monospace;color:var(--muted)}.row-actions button{height:28px;padding:0 8px;border-radius:7px;background:transparent}.row-actions .danger{color:#ee7783}.link-table-head,.link-row{display:grid;grid-template-columns:1.1fr 2fr 1.2fr auto;gap:16px;align-items:center;padding:0 17px}.link-table-head{height:38px;color:var(--muted);font-size:11px;border-bottom:1px solid var(--line)}.link-row{min-height:65px;border-bottom:1px solid var(--line)}.link-name{display:flex;gap:9px;min-width:0;align-items:center}.link-name strong,.link-url,.link-description{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.link-url{color:var(--accent);text-decoration:none}.link-description{margin:0;color:var(--muted)}.add-in-group{border:0;border-radius:0;width:100%;height:42px;color:var(--accent);background:transparent;text-align:left;padding-left:17px}.modal{width:min(100% - 28px,530px);padding:0;border:1px solid var(--line);border-radius:18px;background:var(--surface-solid);color:var(--text);box-shadow:var(--shadow)}.modal::backdrop{background:rgba(5,7,13,.72);backdrop-filter:blur(5px)}.modal header,.modal footer{padding:20px 23px;display:flex;align-items:center;justify-content:space-between}.modal header{border-bottom:1px solid var(--line)}.modal h2{font-size:21px;letter-spacing:-.7px;margin:0}.modal .eyebrow{margin-bottom:6px}.close{border:0;background:transparent;color:var(--muted);font-size:28px;cursor:pointer}.modal footer{border-top:1px solid var(--line);justify-content:flex-end;gap:9px}.modal footer .primary{height:34px;padding:0 15px}.fields{padding:20px 23px;display:grid;gap:15px}.field{display:grid;gap:7px}.field label{font-size:12px;font-weight:700}.field input,.field textarea,.field select{height:41px;border:1px solid var(--line);background:var(--bg);border-radius:9px;padding:0 11px;color:var(--text);font:14px inherit;outline:0}.field textarea{height:73px;padding-top:10px;resize:vertical}.field input:focus,.field textarea:focus{border-color:var(--accent)}.field .hint{font-size:11px;color:var(--muted)}.two-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}.checkbox{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px}.empty-admin{padding:50px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:16px}.empty-admin h2{color:var(--text);font-size:17px}@media(max-width:750px){.admin-topbar{padding:0 17px}.admin-main{padding:35px 17px}.admin-hero{align-items:flex-start;flex-direction:column;margin-bottom:30px}.admin-hero h1{font-size:32px}.toolbar{align-items:flex-start;flex-direction:column}.toolbar-actions{flex-wrap:wrap}.link-table{overflow-x:auto}.link-table-head,.link-row{min-width:700px}.back-link{display:none}.row-actions{gap:3px}.row-actions button{padding:0 6px}.two-fields{grid-template-columns:1fr}}#editor{position:fixed;inset:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;padding:0;border:0;background:transparent;color:inherit;overflow:visible}#editor[open]{display:grid;place-items:center}#editor .modal{margin:0;box-sizing:border-box}#editor::backdrop{background:rgba(28,18,24,.58);backdrop-filter:blur(5px)}.modal{width:min(100% - 28px,560px);max-height:calc(100dvh - 28px);overflow:hidden}.modal header,.modal footer{padding:18px 22px}.fields{padding:19px 22px;overflow:auto;max-height:calc(100dvh - 194px)}.field{min-width:0}.field input,.field textarea,.field select{width:100%;height:42px}.field textarea{height:76px}.form-intro{display:grid;gap:4px;padding:12px 13px;border-radius:10px;background:var(--accent-soft);font-size:12px}.form-intro span{color:var(--muted)}.advanced-fields{border-top:1px solid var(--line);padding-top:13px}.advanced-fields summary{cursor:pointer;color:var(--muted);font-size:12px;font-weight:700}.advanced-fields>div{padding-top:13px}@media(max-width:750px){.modal{width:min(100% - 22px,560px)}.modal header,.modal footer{padding:16px 17px}.fields{padding:17px;max-height:calc(100dvh - 182px)}}</style>
+  <title>NavDesk · 管理</title>
 </head>
 <body class="admin-shell">
   <header class="admin-topbar"><a class="brand" href="/"><span class="brand-mark" id="brandMark">N</span><span id="brandName">NavDesk</span></a><div class="admin-actions"><a class="back-link" href="/">↗ 查看导航</a><button class="minor-button" id="themeButton">◐</button><button class="minor-button" id="logoutButton">退出</button></div></header>
+  <div class="boot-screen" id="bootScreen" role="status"><span class="brand-mark">N</span><span id="bootMessage">正在打开导航…</span><button class="icon-button" id="retryButton" hidden>重新加载</button></div>
   <main class="admin-main" id="adminApp" hidden>
     <section class="admin-hero"><div><p class="eyebrow">NAVIGATION MANAGEMENT</p><h1>管理你的入口</h1><p>按场景分好组，把常用服务安静地放在这里。</p></div><button class="primary add-link" id="addLinkButton">+ 新建链接</button></section>
     <section class="toolbar"><div><strong id="summary">0 个分组 · 0 个链接</strong><span>所有修改会立即保存到私有存储</span></div><div class="toolbar-actions"><button class="minor-button" id="settingsButton">站点设置</button><button class="minor-button" id="importButton">导入 JSON</button><button class="minor-button" id="exportButton">导出备份</button><button class="minor-button" id="addGroupButton">+ 新建分组</button><input id="fileInput" type="file" accept="application/json" hidden /></div></section>
@@ -15,6 +44,169 @@
   <dialog id="editor"><form method="dialog" id="editorForm" class="modal"><header><div><p class="eyebrow" id="modalEyebrow">NEW LINK</p><h2 id="modalTitle">新建链接</h2></div><button class="close" type="button" data-close-editor aria-label="关闭">×</button></header><div id="editorFields"></div><footer><button class="minor-button" type="button" data-close-editor>取消</button><button class="primary" id="saveButton" type="submit" value="default">保存</button></footer></form></dialog>
   <template id="groupTemplate"><section class="manage-group"><header class="manage-group-head"><div class="group-label"><span class="group-icon"></span><strong class="group-name"></strong><span class="link-count"></span></div><div class="row-actions"><button data-action="edit-group">编辑</button><button data-action="move-up">↑</button><button data-action="move-down">↓</button><button data-action="remove-group" class="danger">删除</button></div></header><div class="link-table"><div class="link-table-head"><span>名称</span><span>地址</span><span>备注</span><span>操作</span></div><div class="link-rows"></div></div><button class="add-in-group" data-action="add-link">+ 添加链接</button></section></template>
   <template id="linkTemplate"><article class="link-row"><div class="link-name"><span class="site-icon"></span><strong></strong></div><a class="link-url" target="_blank" rel="noreferrer"></a><p class="link-description"></p><div class="row-actions"><button data-action="edit-link">编辑</button><button data-action="move-link-up">↑</button><button data-action="move-link-down">↓</button><button data-action="remove-link" class="danger">删除</button></div></article></template>
-  <script src="/admin/app.js?v=7" defer></script>
+  <script>const $ = (selector, root = document) => root.querySelector(selector);
+let data = { version: 1, groups: [] };
+let editorState = null;
+const groupsRoot = $("#groups"), dialog = $("#editor"), fields = $("#editorFields");
+
+function uid() { return crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`; }
+function escapeHtml(value) { return String(value ?? "").replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char])); }
+function domain(url) { try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return ""; } }
+const { read, write, request } = window.navdeskBoot;
+function setTheme(theme) { document.documentElement.dataset.theme = theme; write("navdesk-theme", theme); }
+function setBrand(settings = {}) {
+  const name = String(settings.brandName || "NavDesk").trim() || "NavDesk";
+  $("#brandName").textContent = name;
+  $("#brandMark").textContent = [...name][0]?.toUpperCase() || "N";
+  document.title = `${name} · 管理`;
+}
+
+async function save() {
+  const button = $("#saveButton"); if (button) { button.disabled = true; button.textContent = "保存中…"; }
+  try { data = await request("/api/navigation", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }); render(); }
+  catch (error) { alert(error.message); }
+  finally { if (button) { button.disabled = false; button.textContent = "保存"; } }
+}
+
+function render() {
+  setBrand(data.settings);
+  groupsRoot.replaceChildren(); const links = data.groups.reduce((total, group) => total + group.links.length, 0);
+  $("#summary").textContent = `${data.groups.length} 个分组 · ${links} 个链接`;
+  if (!data.groups.length) { groupsRoot.innerHTML = '<section class="empty-admin"><h2>从一个分组开始</h2><p>例如：常用、服务器、开发、AI 或家庭。</p><button class="primary" id="emptyAddGroup">+ 新建分组</button></section>'; $("#emptyAddGroup").onclick = () => openGroup(); return; }
+  data.groups.forEach((group, groupIndex) => {
+    const node = $("#groupTemplate").content.firstElementChild.cloneNode(true);
+    $(".group-icon", node).textContent = group.icon || "◆"; $(".group-icon", node).style.color = group.color; $(".group-icon", node).style.background = `${group.color}22`;
+    $(".group-name", node).textContent = group.name; $(".link-count", node).textContent = `${group.links.length} 项`;
+    node.querySelectorAll("[data-action]").forEach((button) => button.onclick = () => groupAction(button.dataset.action, groupIndex));
+    const rows = $(".link-rows", node);
+    group.links.forEach((link, linkIndex) => {
+      const row = $("#linkTemplate").content.firstElementChild.cloneNode(true);
+      const icon = link.icon; $(".site-icon", row).innerHTML = `${escapeHtml([...link.name][0]?.toUpperCase() || "↗")}${icon ? `<img src="${escapeHtml(icon)}" alt="" loading="lazy" decoding="async" onerror="this.remove()">` : ""}`;
+      $(".link-name strong", row).textContent = link.name; const linkUrl = $(".link-url", row); linkUrl.href = link.url; linkUrl.textContent = domain(link.url); $(".link-description", row).textContent = link.description || "—";
+      row.querySelectorAll("[data-action]").forEach((button) => button.onclick = () => linkAction(button.dataset.action, groupIndex, linkIndex)); rows.append(row);
+    });
+    groupsRoot.append(node);
+  });
+}
+
+function move(list, from, delta) { const to = from + delta; if (to < 0 || to >= list.length) return false; [list[from], list[to]] = [list[to], list[from]]; return true; }
+function groupAction(action, groupIndex) {
+  const group = data.groups[groupIndex];
+  if (action === "add-link") return openLink(groupIndex);
+  if (action === "edit-group") return openGroup(groupIndex);
+  if (action === "remove-group") { if (!confirm(`删除“${group.name}”及其中 ${group.links.length} 个链接？`)) return; data.groups.splice(groupIndex, 1); return save(); }
+  if (action === "move-up" && move(data.groups, groupIndex, -1)) return save();
+  if (action === "move-down" && move(data.groups, groupIndex, 1)) return save();
+}
+function linkAction(action, groupIndex, linkIndex) {
+  const links = data.groups[groupIndex].links;
+  if (action === "edit-link") return openLink(groupIndex, linkIndex);
+  if (action === "remove-link") { if (!confirm(`删除“${links[linkIndex].name}”？`)) return; links.splice(linkIndex, 1); return save(); }
+  if (action === "move-link-up" && move(links, linkIndex, -1)) return save();
+  if (action === "move-link-down" && move(links, linkIndex, 1)) return save();
+}
+
+function showModal(type, editing) {
+  editorState = { type, ...editing };
+  if (type === "settings") {
+    $("#modalEyebrow").textContent = "SITE SETTINGS";
+    $("#modalTitle").textContent = "站点设置";
+  } else {
+    $("#modalEyebrow").textContent = `${editing.index === undefined ? "NEW" : "EDIT"} ${type === "group" ? "GROUP" : "LINK"}`;
+    $("#modalTitle").textContent = `${editing.index === undefined ? "新建" : "编辑"}${type === "group" ? "分组" : "链接"}`;
+  }
+  dialog.showModal();
+}
+function input(label, name, value = "", options = {}) { return `<div class="field ${options.className || ""}"><label for="field-${name}">${label}</label>${options.textarea ? `<textarea id="field-${name}" name="${name}" placeholder="${options.placeholder || ""}">${escapeHtml(value)}</textarea>` : `<input id="field-${name}" name="${name}" value="${escapeHtml(value)}" ${options.required ? "required" : ""} ${options.type ? `type="${options.type}"` : ""} placeholder="${options.placeholder || ""}" />`}${options.hint ? `<span class="hint">${options.hint}</span>` : ""}</div>`; }
+function openGroup(index) {
+  const group = index === undefined ? { name: "", icon: "", color: "#6d7cff" } : data.groups[index];
+  fields.innerHTML = `<div class="fields">${input("分组名称", "name", group.name, { required: true, placeholder: "例如：开发工具" })}<div class="two-fields">${input("图标（可选）", "icon", group.icon, { placeholder: "例如：◈" })}<div class="field"><label for="field-color">主题色</label><input id="field-color" name="color" type="color" value="${escapeHtml(group.color || "#6d7cff")}" /></div></div></div>`;
+  showModal("group", { index });
+}
+function openLink(groupIndex, index) {
+  const link = index === undefined ? { name: "", url: "", description: "", icon: "", openInNew: true } : data.groups[groupIndex].links[index];
+  fields.innerHTML = `<div class="fields link-fields"><div class="form-intro"><strong>链接信息</strong><span>填写名称和网址即可，留空图标将显示名称首字。</span></div><div class="two-fields">${input("名称", "name", link.name, { required: true, placeholder: "例如：ChatGPT" })}${input("网址", "url", link.url, { required: true, type: "url", placeholder: "https://…" })}</div>${input("备注（可选）", "description", link.description, { textarea: true, placeholder: "一句话说明这个入口" })}<details class="advanced-fields"><summary>更多设置</summary><div>${input("自定义图标地址（可选）", "icon", link.icon, { type: "url", placeholder: "留空将显示名称首字" })}</div></details><label class="checkbox"><input name="openInNew" type="checkbox" ${link.openInNew !== false ? "checked" : ""} /> 在新窗口打开</label></div>`;
+  showModal("link", { groupIndex, index });
+}
+
+function openSettings() {
+  const settings = data.settings || {};
+  fields.innerHTML = `<div class="fields"><div class="form-intro"><strong>站点显示</strong><span>用于左上角品牌名称、浏览器标题和登录按钮。</span></div>${input("左上角名称", "brandName", settings.brandName || "NavDesk", { required: true, placeholder: "例如：Suria 的导航" })}</div>`;
+  showModal("settings", {});
+}
+
+$("#editorForm").onsubmit = async (event) => {
+  event.preventDefault(); if (event.submitter?.value === "cancel") return dialog.close(); const form = new FormData(event.currentTarget);
+  if (editorState.type === "group") {
+    const group = { id: editorState.index === undefined ? uid() : data.groups[editorState.index].id, name: String(form.get("name") || "").trim(), icon: String(form.get("icon") || "").trim(), color: String(form.get("color") || "#6d7cff"), links: editorState.index === undefined ? [] : data.groups[editorState.index].links };
+    if (!group.name) return; editorState.index === undefined ? data.groups.push(group) : data.groups.splice(editorState.index, 1, group);
+  } else if (editorState.type === "settings") {
+    const brandName = String(form.get("brandName") || "").trim().slice(0, 24);
+    if (!brandName) return;
+    data.settings = { ...(data.settings || {}), brandName };
+  } else {
+    const link = { id: editorState.index === undefined ? uid() : data.groups[editorState.groupIndex].links[editorState.index].id, name: String(form.get("name") || "").trim(), url: String(form.get("url") || "").trim(), description: String(form.get("description") || "").trim(), icon: String(form.get("icon") || "").trim(), openInNew: form.get("openInNew") === "on" };
+    try { const url = new URL(link.url); if (!/^https?:$/.test(url.protocol)) throw new Error(); } catch { alert("请输入有效的 http 或 https 网址"); return; }
+    if (!link.name) return; const list = data.groups[editorState.groupIndex].links; editorState.index === undefined ? list.push(link) : list.splice(editorState.index, 1, link);
+  }
+  dialog.close(); await save();
+};
+
+document.querySelectorAll("[data-close-editor]").forEach((button) => {
+  button.addEventListener("click", () => dialog.close());
+});
+
+$("#addGroupButton").onclick = () => openGroup(); $("#addLinkButton").onclick = () => data.groups.length ? openLink(0) : openGroup(); $("#settingsButton").onclick = () => openSettings();
+$("#themeButton").onclick = () => setTheme(document.documentElement.dataset.theme === "light" ? "dark" : "light");
+$("#logoutButton").onclick = async () => { await request("/api/auth/logout", { method: "POST" }); location.reload(); };
+$("#exportButton").onclick = () => { const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `navdesk-${new Date().toISOString().slice(0, 10)}.json`; a.click(); URL.revokeObjectURL(url); };
+$("#importButton").onclick = () => $("#fileInput").click(); $("#fileInput").onchange = async (event) => { const file = event.target.files[0]; if (!file) return; try { const imported = JSON.parse(await file.text()); if (!Array.isArray(imported.groups)) throw new Error(); if (!confirm("导入将替换当前所有分组和链接，继续吗？")) return; data = imported; await save(); } catch { alert("这不是可用的 NavDesk JSON 备份文件"); } finally { event.target.value = ""; } };
+
+async function initialise(first = false) {
+  $("#bootScreen").hidden = false;
+  $("#retryButton").hidden = true;
+  $("#bootMessage").textContent = "正在打开管理台…";
+  try {
+    const result = first ? await window.navdeskBoot.navigation : { data: await request("/api/navigation") };
+    if (result.error) throw result.error;
+    data = result.data;
+    $("#loginScreen").hidden = true;
+    $("#adminApp").hidden = false;
+    $("#bootScreen").hidden = true;
+    render();
+    performance.mark("navdesk-content-ready");
+  } catch (error) {
+    if (error.status === 401) { $("#bootScreen").hidden = true; $("#loginScreen").hidden = false; return; }
+    $("#bootMessage").textContent = "暂时无法读取导航，请检查网络后重试。";
+    $("#retryButton").hidden = false;
+  }
+}
+$("#retryButton").onclick = () => initialise();
+$("#loginForm").onsubmit = async (event) => {
+  event.preventDefault();
+  const button = $("button", event.currentTarget);
+  button.disabled = true;
+  button.innerHTML = "正在验证…";
+  $("#loginMessage").textContent = "";
+  try {
+    await request("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: $("#password").value }) });
+    data = await request("/api/navigation", { cache: "no-store" });
+    $("#loginScreen").hidden = true;
+    $("#adminApp").hidden = false;
+    $("#bootScreen").hidden = true;
+    $("#password").value = "";
+    render();
+    performance.mark("navdesk-content-ready");
+  } catch (error) {
+    $("#loginMessage").textContent = error.message || "登录失败，请稍后重试。";
+  } finally {
+    button.disabled = false;
+    button.innerHTML = "进入管理台 <span>→</span>";
+  }
+};
+performance.mark("navdesk-shell-ready");
+initialise(true);
+</script>
+<noscript><p>请启用 JavaScript 以登录并读取私有导航。</p></noscript>
 </body>
 </html>

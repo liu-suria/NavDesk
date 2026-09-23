@@ -4,5 +4,9 @@
   "type": "module",
   "dependencies": {
     "@edgeone/pages-blob": "0.0.14"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "preview": "node scripts/preview.mjs"
   }
 }

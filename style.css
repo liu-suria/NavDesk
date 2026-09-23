@@ -39,25 +39,9 @@ body {
 .app-shell {
   overflow-x: hidden;
 }
-.ambient {
-  position: fixed;
-  width: 560px;
-  height: 560px;
-  border-radius: 50%;
-  filter: blur(100px);
-  opacity: 0.18;
-  pointer-events: none;
-}
-.ambient-one {
-  background: #f1b5c5;
-  left: -160px;
-  top: -230px;
-}
-.ambient-two {
-  background: #d6bce8;
-  right: -220px;
-  bottom: -320px;
-}
+
+
+
 .container {
   position: relative;
   max-width: 1280px;
@@ -140,10 +124,7 @@ body {
   justify-content: center;
   line-height: 1;
 }
-.welcome {
-  padding: 99px 0 55px;
-  max-width: 720px;
-}
+
 .eyebrow {
   font-size: 11px;
   letter-spacing: 1.6px;
@@ -151,52 +132,21 @@ body {
   font-weight: 800;
   margin: 0 0 14px;
 }
-.welcome h1,
 .login-card h1 {
   letter-spacing: -2.4px;
   font-size: 42px;
   line-height: 1.1;
   margin: 0 0 14px;
 }
-.welcome > p,
 .login-card > p:not(.eyebrow) {
   margin: 0;
   color: var(--muted);
   font-size: 16px;
 }
-.search {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  box-shadow: var(--shadow);
-  border-radius: 16px;
-  height: 58px;
-  margin-top: 36px;
-  max-width: 650px;
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  padding: 0 16px;
-  color: var(--muted);
-}
-.search > span {
-  font: 32px/1 Georgia;
-}
-.search input {
-  font: 15px inherit;
-  flex: 1;
-  border: 0;
-  outline: 0;
-  background: none;
-  color: var(--text);
-  min-width: 0;
-}
-.search kbd {
-  font: 11px inherit;
-  border: 1px solid var(--line);
-  border-radius: 5px;
-  padding: 3px 5px;
-  color: var(--muted);
-}
+
+
+
+
 .navigation {
   display: grid;
   gap: 38px;
@@ -396,21 +346,15 @@ body {
   .clock {
     display: none;
   }
-  .welcome {
-    padding: 71px 0 40px;
-  }
-  .welcome h1 {
-    font-size: 34px;
-  }
+
+
   .cards {
     grid-template-columns: 1fr;
   }
   .navigation {
     gap: 31px;
   }
-  .search {
-    margin-top: 29px;
-  }
+
   .login-card {
     padding: 32px 25px;
     border-radius: 20px;
@@ -533,11 +477,9 @@ body {
   font-weight: 650;
 }
 .navigation { gap: 12px; }
-.boot-screen ~ .topbar,
-.boot-screen ~ .workspace-layout { display: none; }
-.boot-screen[hidden] ~ .topbar,
-.boot-screen[hidden] ~ .workspace-layout { display: flex; }
-.boot-screen[hidden] ~ .workspace-layout { display: grid; }
+
+
+
 .nav-group { scroll-margin-top: 96px; }
 .group-heading { margin-bottom: 10px; }
 .group-heading h2 { font-size: 15px; }
@@ -600,7 +542,7 @@ body {
   .web-search input { padding-inline: 14px; font-size: 15px; }
   .web-search button { width: 52px; font-size: 31px; }
   .workspace-layout { display: block; margin-top: 0; }
-  .boot-screen[hidden] ~ .workspace-layout { display: block; }
+
   .category-rail {
     position: sticky;
     top: 0;
@@ -630,4 +572,17 @@ body {
   .nav-card { min-height: 64px; padding: 9px; }
   .card-copy strong { font-size: 12px; }
   .card-copy small { display: none; }
+}
+
+body{background:radial-gradient(ellipse at top left,rgba(229,162,181,.08),transparent 65%),var(--bg)}
+.boot-screen{min-height:180px;padding:32px 0}
+.boot-screen:not([hidden]) ~ .workspace-layout{display:none}
+.site-icon{position:relative}
+.site-icon img{position:absolute}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
+
+@media(max-width:650px){
+  .icon-button,.admin-link{min-width:44px;min-height:44px}
+  .web-search input,.web-search select,.login-card input{font-size:16px}
+  .topbar{backdrop-filter:none}
 }

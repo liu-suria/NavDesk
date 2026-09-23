@@ -4,11 +4,10 @@ let editorState = null;
 const groupsRoot = $("#groups"), dialog = $("#editor"), fields = $("#editorFields");
 
 function uid() { return crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`; }
-function escapeHtml(value) { const node = document.createElement("span"); node.textContent = value || ""; return node.innerHTML; }
+function escapeHtml(value) { return String(value ?? "").replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char])); }
 function domain(url) { try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return ""; } }
-function favicon(url) { try { return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(new URL(url).hostname)}&sz=64`; } catch { return ""; } }
-async function request(url, options = {}) { const response = await fetch(url, { credentials: "same-origin", ...options }); const body = await response.json().catch(() => ({})); if (!response.ok) throw new Error(body.error || `请求失败 (${response.status})`); return body; }
-function setTheme(theme) { document.documentElement.dataset.theme = theme; localStorage.setItem("navdesk-theme", theme); }
+const { read, write, request } = window.navdeskBoot;
+function setTheme(theme) { document.documentElement.dataset.theme = theme; write("navdesk-theme", theme); }
 function setBrand(settings = {}) {
   const name = String(settings.brandName || "NavDesk").trim() || "NavDesk";
   $("#brandName").textContent = name;
@@ -36,7 +35,7 @@ function render() {
     const rows = $(".link-rows", node);
     group.links.forEach((link, linkIndex) => {
       const row = $("#linkTemplate").content.firstElementChild.cloneNode(true);
-      const icon = link.icon || favicon(link.url); $(".site-icon", row).innerHTML = icon ? `<img src="${escapeHtml(icon)}" alt="" onerror="this.remove()">` : "↗";
+      const icon = link.icon; $(".site-icon", row).innerHTML = `${escapeHtml([...link.name][0]?.toUpperCase() || "↗")}${icon ? `<img src="${escapeHtml(icon)}" alt="" loading="lazy" decoding="async" onerror="this.remove()">` : ""}`;
       $(".link-name strong", row).textContent = link.name; const linkUrl = $(".link-url", row); linkUrl.href = link.url; linkUrl.textContent = domain(link.url); $(".link-description", row).textContent = link.description || "—";
       row.querySelectorAll("[data-action]").forEach((button) => button.onclick = () => linkAction(button.dataset.action, groupIndex, linkIndex)); rows.append(row);
     });
@@ -80,7 +79,7 @@ function openGroup(index) {
 }
 function openLink(groupIndex, index) {
   const link = index === undefined ? { name: "", url: "", description: "", icon: "", openInNew: true } : data.groups[groupIndex].links[index];
-  fields.innerHTML = `<div class="fields link-fields"><div class="form-intro"><strong>链接信息</strong><span>填写名称和网址即可，图标会自动获取。</span></div><div class="two-fields">${input("名称", "name", link.name, { required: true, placeholder: "例如：ChatGPT" })}${input("网址", "url", link.url, { required: true, type: "url", placeholder: "https://…" })}</div>${input("备注（可选）", "description", link.description, { textarea: true, placeholder: "一句话说明这个入口" })}<details class="advanced-fields"><summary>更多设置</summary><div>${input("自定义图标地址（可选）", "icon", link.icon, { type: "url", placeholder: "留空将自动显示站点图标" })}</div></details><label class="checkbox"><input name="openInNew" type="checkbox" ${link.openInNew !== false ? "checked" : ""} /> 在新窗口打开</label></div>`;
+  fields.innerHTML = `<div class="fields link-fields"><div class="form-intro"><strong>链接信息</strong><span>填写名称和网址即可，留空图标将显示名称首字。</span></div><div class="two-fields">${input("名称", "name", link.name, { required: true, placeholder: "例如：ChatGPT" })}${input("网址", "url", link.url, { required: true, type: "url", placeholder: "https://…" })}</div>${input("备注（可选）", "description", link.description, { textarea: true, placeholder: "一句话说明这个入口" })}<details class="advanced-fields"><summary>更多设置</summary><div>${input("自定义图标地址（可选）", "icon", link.icon, { type: "url", placeholder: "留空将显示名称首字" })}</div></details><label class="checkbox"><input name="openInNew" type="checkbox" ${link.openInNew !== false ? "checked" : ""} /> 在新窗口打开</label></div>`;
   showModal("link", { groupIndex, index });
 }
 
@@ -117,10 +116,26 @@ $("#logoutButton").onclick = async () => { await request("/api/auth/logout", { m
 $("#exportButton").onclick = () => { const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `navdesk-${new Date().toISOString().slice(0, 10)}.json`; a.click(); URL.revokeObjectURL(url); };
 $("#importButton").onclick = () => $("#fileInput").click(); $("#fileInput").onchange = async (event) => { const file = event.target.files[0]; if (!file) return; try { const imported = JSON.parse(await file.text()); if (!Array.isArray(imported.groups)) throw new Error(); if (!confirm("导入将替换当前所有分组和链接，继续吗？")) return; data = imported; await save(); } catch { alert("这不是可用的 NavDesk JSON 备份文件"); } finally { event.target.value = ""; } };
 
-async function initialise() {
-  setTheme(localStorage.getItem("navdesk-theme") || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"));
-  try { const session = await request("/api/auth/session"); if (!session.authenticated) { $("#loginScreen").hidden = false; return; } data = await request("/api/navigation"); $("#loginScreen").hidden = true; $("#adminApp").hidden = false; render(); } catch { $("#loginScreen").hidden = false; $("#loginMessage").textContent = "服务暂不可用，请稍后重试。"; }
+async function initialise(first = false) {
+  $("#bootScreen").hidden = false;
+  $("#retryButton").hidden = true;
+  $("#bootMessage").textContent = "正在打开管理台…";
+  try {
+    const result = first ? await window.navdeskBoot.navigation : { data: await request("/api/navigation") };
+    if (result.error) throw result.error;
+    data = result.data;
+    $("#loginScreen").hidden = true;
+    $("#adminApp").hidden = false;
+    $("#bootScreen").hidden = true;
+    render();
+    performance.mark("navdesk-content-ready");
+  } catch (error) {
+    if (error.status === 401) { $("#bootScreen").hidden = true; $("#loginScreen").hidden = false; return; }
+    $("#bootMessage").textContent = "暂时无法读取导航，请检查网络后重试。";
+    $("#retryButton").hidden = false;
+  }
 }
+$("#retryButton").onclick = () => initialise();
 $("#loginForm").onsubmit = async (event) => {
   event.preventDefault();
   const button = $("button", event.currentTarget);
@@ -129,12 +144,13 @@ $("#loginForm").onsubmit = async (event) => {
   $("#loginMessage").textContent = "";
   try {
     await request("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: $("#password").value }) });
-    const session = await request("/api/auth/session", { cache: "no-store" });
-    if (!session.authenticated) throw new Error("登录状态没有保存成功。请确认浏览器允许此网站使用 Cookie 后重试。");
     data = await request("/api/navigation", { cache: "no-store" });
     $("#loginScreen").hidden = true;
     $("#adminApp").hidden = false;
+    $("#bootScreen").hidden = true;
+    $("#password").value = "";
     render();
+    performance.mark("navdesk-content-ready");
   } catch (error) {
     $("#loginMessage").textContent = error.message || "登录失败，请稍后重试。";
   } finally {
@@ -142,4 +158,5 @@ $("#loginForm").onsubmit = async (event) => {
     button.innerHTML = "进入管理台 <span>→</span>";
   }
 };
-initialise();
+performance.mark("navdesk-shell-ready");
+initialise(true);

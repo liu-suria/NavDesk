@@ -1,0 +1,59 @@
+{
+  "environment": "Local mock API, 250ms server delay, 4Mbps bandwidth, 150ms latency, cache disabled; markers are not FCP/LCP",
+  "results": [
+    {
+      "device": "desktop",
+      "width": 1365,
+      "documentWidth": 1365,
+      "shell": 202.29999995231628,
+      "content": 429.2999999523163,
+      "apiCalls": 1,
+      "externalCode": 0
+    },
+    {
+      "device": "desktop",
+      "width": 1365,
+      "documentWidth": 1365,
+      "shell": 199.39999997615814,
+      "content": 435.5,
+      "apiCalls": 1,
+      "externalCode": 0
+    },
+    {
+      "device": "desktop",
+      "width": 1365,
+      "documentWidth": 1365,
+      "shell": 201.90000009536743,
+      "content": 430,
+      "apiCalls": 1,
+      "externalCode": 0
+    },
+    {
+      "device": "mobile",
+      "width": 390,
+      "documentWidth": 390,
+      "shell": 202.5,
+      "content": 433.3000000715256,
+      "apiCalls": 1,
+      "externalCode": 0
+    },
+    {
+      "device": "mobile",
+      "width": 390,
+      "documentWidth": 390,
+      "shell": 199.5,
+      "content": 443.8000000715256,
+      "apiCalls": 1,
+      "externalCode": 0
+    },
+    {
+      "device": "mobile",
+      "width": 390,
+      "documentWidth": 390,
+      "shell": 199.5,
+      "content": 429.5,
+      "apiCalls": 1,
+      "externalCode": 0
+    }
+  ]
+}
