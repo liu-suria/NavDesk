@@ -35,12 +35,13 @@ function render() {
     const rows = $(".link-rows", node);
     group.links.forEach((link, linkIndex) => {
       const row = $("#linkTemplate").content.firstElementChild.cloneNode(true);
-      const icon = link.icon; $(".site-icon", row).innerHTML = `${escapeHtml([...link.name][0]?.toUpperCase() || "↗")}${icon ? `<img src="${escapeHtml(icon)}" alt="" loading="lazy" decoding="async" onerror="this.remove()">` : ""}`;
+      const icon=window.navdeskIcons.source(link);$(".site-icon",row).dataset.icon=icon;$(".site-icon",row).innerHTML=`<span class="icon-fallback">${escapeHtml([...link.name][0]?.toUpperCase() || "↗")}</span>`;
       $(".link-name strong", row).textContent = link.name; const linkUrl = $(".link-url", row); linkUrl.href = link.url; linkUrl.textContent = domain(link.url); $(".link-description", row).textContent = link.description || "—";
       row.querySelectorAll("[data-action]").forEach((button) => button.onclick = () => linkAction(button.dataset.action, groupIndex, linkIndex)); rows.append(row);
     });
     groupsRoot.append(node);
   });
+  window.navdeskIcons.schedule(groupsRoot);
 }
 
 function move(list, from, delta) { const to = from + delta; if (to < 0 || to >= list.length) return false; [list[from], list[to]] = [list[to], list[from]]; return true; }
@@ -79,7 +80,7 @@ function openGroup(index) {
 }
 function openLink(groupIndex, index) {
   const link = index === undefined ? { name: "", url: "", description: "", icon: "", openInNew: true } : data.groups[groupIndex].links[index];
-  fields.innerHTML = `<div class="fields link-fields"><div class="form-intro"><strong>链接信息</strong><span>填写名称和网址即可，留空图标将显示名称首字。</span></div><div class="two-fields">${input("名称", "name", link.name, { required: true, placeholder: "例如：ChatGPT" })}${input("网址", "url", link.url, { required: true, type: "url", placeholder: "https://…" })}</div>${input("备注（可选）", "description", link.description, { textarea: true, placeholder: "一句话说明这个入口" })}<details class="advanced-fields"><summary>更多设置</summary><div>${input("自定义图标地址（可选）", "icon", link.icon, { type: "url", placeholder: "留空将显示名称首字" })}</div></details><label class="checkbox"><input name="openInNew" type="checkbox" ${link.openInNew !== false ? "checked" : ""} /> 在新窗口打开</label></div>`;
+  fields.innerHTML = `<div class="fields link-fields"><div class="form-intro"><strong>链接信息</strong><span>填写名称和网址即可，图标会自动获取并缓存。</span></div><div class="two-fields">${input("名称", "name", link.name, { required: true, placeholder: "例如：ChatGPT" })}${input("网址", "url", link.url, { required: true, type: "url", placeholder: "https://…" })}</div>${input("备注（可选）", "description", link.description, { textarea: true, placeholder: "一句话说明这个入口" })}<details class="advanced-fields"><summary>更多设置</summary><div>${input("自定义图标地址（可选）", "icon", link.icon, { type: "url", placeholder: "留空自动获取并缓存网站图标" })}</div></details><label class="checkbox"><input name="openInNew" type="checkbox" ${link.openInNew !== false ? "checked" : ""} /> 在新窗口打开</label></div>`;
   showModal("link", { groupIndex, index });
 }
 
@@ -104,6 +105,7 @@ $("#editorForm").onsubmit = async (event) => {
     if (!link.name) return; const list = data.groups[editorState.groupIndex].links; editorState.index === undefined ? list.push(link) : list.splice(editorState.index, 1, link);
   }
   dialog.close(); await save();
+  if (editorState.type === "link") { const link=data.groups[editorState.groupIndex]?.links[editorState.index ?? data.groups[editorState.groupIndex].links.length-1]; if(link)window.navdeskIcons.warm(link); }
 };
 
 document.querySelectorAll("[data-close-editor]").forEach((button) => {

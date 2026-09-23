@@ -27,7 +27,7 @@
         <input id="searchInput" type="search" autocomplete="off" placeholder="搜索互联网…" aria-label="搜索关键词" />
         <button type="submit" aria-label="搜索">⌕</button>
       </form>
-      <div class="top-actions"><span id="clock" class="clock"></span><button class="icon-button" id="themeButton" title="切换主题">◐</button><a class="admin-link" href="/admin/">管理</a></div>
+      <div class="top-actions"><span id="clock" class="clock"></span><button class="icon-button" id="sortGroups" type="button" title="调整分类顺序" aria-label="调整分类顺序">↕</button><button class="icon-button" id="themeButton" title="切换主题">◐</button><a class="admin-link" href="/admin/">管理</a></div>
     </header>
     <div class="boot-screen" id="bootScreen" role="status"><span class="brand-mark">N</span><span id="bootMessage">正在打开导航…</span><button class="icon-button" id="retryButton" hidden>重新加载</button></div>
     <div class="workspace-layout">
@@ -38,7 +38,22 @@
   <section class="login-screen" id="loginScreen" hidden>
     <div class="login-card"><span class="brand-mark large" id="loginBrandMark">N</span><p class="eyebrow">PRIVATE NAVIGATION</p><h1>你的个人导航台</h1><p>输入密码，进入仅属于你的工作空间。</p><form id="loginForm"><input id="password" type="password" autocomplete="current-password" placeholder="请输入密码" required /><button class="primary" type="submit">进入 <span id="loginBrandName">NavDesk</span> <span>→</span></button><p class="form-message" id="loginMessage"></p></form></div>
   </section>
-  <template id="groupTemplate"><section class="nav-group"><div class="group-heading"><span class="group-icon"></span><h2></h2><span class="count"></span></div><div class="cards"></div></section></template>
+  <template id="groupTemplate"><section class="nav-group"><div class="group-heading"><span class="group-icon"></span><h2></h2><div class="group-actions"><button class="group-add" type="button" title="添加网址" aria-label="添加网址">＋</button><button class="group-sort" type="button" title="调整网址顺序" aria-label="调整网址顺序">↕</button></div><span class="count"></span></div><div class="cards"></div></section></template>
+  <dialog id="quickEditor" class="quick-editor">
+    <form id="quickForm">
+      <header><div><p id="quickCategory"></p><h2 id="quickTitle">添加网址</h2></div><button type="button" data-quick-close aria-label="关闭">×</button></header>
+      <label>名称<input name="name" maxlength="80" required autocomplete="off"></label>
+      <label>网址<input name="url" type="url" required placeholder="https://" autocomplete="url"></label>
+      <label>备注<input name="description" maxlength="160"></label>
+      <details><summary>图标设置</summary><label>自定义图标地址<input name="icon" type="url" placeholder="留空自动获取并缓存"></label></details>
+      <label class="quick-check"><input name="openInNew" type="checkbox" checked>在新窗口打开</label>
+      <p id="quickMessage" role="status"></p>
+      <footer><button type="button" data-quick-close>取消</button><button type="submit" class="primary" id="quickSave">保存</button></footer>
+    </form>
+  </dialog>
+  <div id="linkMenu" class="link-menu" role="menu" hidden><button role="menuitem" data-menu="open">打开</button><button role="menuitem" data-menu="edit">编辑</button><button role="menuitem" data-menu="delete" class="danger">删除</button></div>
+  <dialog id="sortEditor" class="quick-editor"><header><div><p>调整显示顺序</p><h2 id="sortTitle">排序</h2></div><button type="button" id="sortClose" aria-label="关闭排序">×</button></header><div id="sortList"></div><p id="sortMessage" role="status"></p><footer><button type="button" id="sortCancel">取消</button><button type="button" class="primary" id="sortSave">保存排序</button></footer></dialog>
+  <p id="pageMessage" class="page-message" role="status" hidden></p>
   <!-- APP -->
 <noscript><p>请启用 JavaScript 以登录并读取私有导航。</p></noscript>
 </body>

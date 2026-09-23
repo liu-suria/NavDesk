@@ -12,7 +12,7 @@ for (const [name, output, script, styles] of [
   const html = read(`templates/${name}.html`)
     .replace('<!-- BOOT -->', () => `<script>${inlineJS(read('boot.js'))}</script>`)
     .replace('<!-- STYLE -->', () => `<style>${css(styles.map(read).join('\n'))}</style>`)
-    .replace('<!-- APP -->', () => `<script>${inlineJS(read(script))}</script>`);
+    .replace('<!-- APP -->', () => `<script>${inlineJS(read('icons.js')+'\n'+read(script))}</script>`);
   writeFileSync(output, html);
   console.log(`${output}: ${Buffer.byteLength(html)} B; gzip ${gzipSync(html).length} B; no external JS/CSS`);
 }
