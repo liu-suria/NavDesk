@@ -32,6 +32,6 @@ const currentAssets=new Set([calendarURL,modelURL,manageURL,schemaURL,uiURL,reco
 // Content-addressed public code can be reused indefinitely; private API data is never cached here.
 const deployment=JSON.parse(read('edgeone.json'));
 deployment.headers=deployment.headers.filter(rule=>!/^\/(calendar|model|manage|navschema|dialogs|recovery|editor)\.[a-f0-9]{12}\.mjs$/.test(rule.source));
-for(const path of currentAssets)deployment.headers.unshift({source:'/'+path,headers:[{key:'Cache-Control',value:'public, max-age=31536000, immutable'}]});
+for(const path of currentAssets)deployment.headers.unshift({source:'/'+path,headers:[{key:'Cache-Control',value:'public, max-age=31536000, immutable'},{key:'Content-Type',value:'text/javascript; charset=utf-8'}]});
 writeFileSync('edgeone.json',JSON.stringify(deployment,null,2)+'\n');
 for(const file of readdirSync('.'))if(/^(calendar|model|manage|navschema|dialogs|recovery|editor)\.[a-f0-9]{12}\.mjs$/.test(file)&&!currentAssets.has(file))unlinkSync(file);
