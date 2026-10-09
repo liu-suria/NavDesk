@@ -7,7 +7,7 @@ export async function onRequestGet(context) {
   try { host=iconHost(new URL(context.request.url).searchParams.get('url')); }
   catch { return new Response(null,{status:400,headers:{'Cache-Control':'no-store'}}); }
   const icon=await loadIcon(getNavigationStore(),host);
-  const headers={'X-NavDesk-Icon-Cache':'v5','Cache-Control':'private, max-age=86400','Vary':'Cookie, Authorization','X-Content-Type-Options':'nosniff'};
+  const headers={'X-NavDesk-Icon-Cache':'v6','Cache-Control':'private, max-age=86400','Vary':'Cookie, Authorization','X-Content-Type-Options':'nosniff'};
   if(!icon.body)return new Response(null,{status:404,headers:{...headers,'Cache-Control':'private, max-age=3600'}});
   const bytes=Uint8Array.from(atob(icon.body),c=>c.charCodeAt(0));
   return new Response(bytes,{headers:{...headers,'Content-Type':icon.type}});
@@ -15,6 +15,6 @@ export async function onRequestGet(context) {
 
 export async function onRequestPost(context){
  const auth=await requireAuth(context);if(auth.response)return auth.response;
- try{const input=await readJson(context.request),host=iconHost(input.url);const icon=await loadIcon(getNavigationStore(),host,fetch,Date.now(),true);return new Response(JSON.stringify({release:'v5',ok:!!icon.body&&!icon.refreshFailed,...(!icon.body?{error:icon.error}: {})}),{headers:{'Content-Type':'application/json','Cache-Control':'no-store'}})}
+ try{const input=await readJson(context.request),host=iconHost(input.url);const icon=await loadIcon(getNavigationStore(),host,fetch,Date.now(),true);return new Response(JSON.stringify({release:'v6',ok:!!icon.body&&!icon.refreshFailed,...(!icon.body?{error:icon.error}: {})}),{headers:{'Content-Type':'application/json','Cache-Control':'no-store'}})}
  catch{return new Response(JSON.stringify({error:'无法刷新图标'}),{status:400,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}})}
 }

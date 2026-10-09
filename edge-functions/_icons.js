@@ -50,7 +50,7 @@ export async function loadIcon(store, host, fetcher = fetch, now = Date.now(), f
     if (!response.ok || !['image/png','image/jpeg','image/webp','image/x-icon','image/vnd.microsoft.icon'].includes(type)) throw new Error('Not an image');
     const reader = response.body.getReader();
     const chunks = []; let size = 0;
-    for (;;) { const {done,value} = await reader.read(); if (done) break; size += value.length; if(size > 65536){await reader.cancel();throw new Error('Image too large')} chunks.push(value); }
+    for (;;) { const {done,value} = await reader.read(); if (done) break; const chunk=value instanceof Uint8Array?value:new Uint8Array(value); size += chunk.byteLength; if(size > 65536){await reader.cancel();throw new Error('Image too large')} chunks.push(chunk); }
     if (!size) throw new Error('Empty icon');
     const bytes = new Uint8Array(size); let offset = 0;
     for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length}

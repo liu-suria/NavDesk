@@ -33,3 +33,8 @@ test('ICO compaction selects one 32px frame and preserves PNG bytes',()=>{
  bytes.set([137,80,78,71,13,10,26,10],52);
  const result=compactIcon(bytes,'image/x-icon');assert.equal(result.type,'image/png');assert.equal(result.bytes.length,8);assert.deepEqual([...result.bytes],[137,80,78,71,13,10,26,10]);
 });
+
+test('edge streams with ArrayBuffer chunks produce valid cached bytes',async()=>{
+ const body=new ReadableStream({start(controller){controller.enqueue(new Uint8Array([1,2,3]).buffer);controller.close()}});
+ const icon=await loadIcon(store(),'example.com',async()=>new Response(body,{headers:{'Content-Type':'image/png'}}));assert.equal(icon.body,'AQID');
+});
