@@ -31,12 +31,14 @@
     </header>
     <div class="boot-screen" id="bootScreen" role="status"><span class="brand-mark">N</span><span id="bootMessage">正在打开导航…</span><button class="icon-button" id="retryButton" hidden>重新加载</button></div>
     <div id="localSearchStatus" class="search-status" hidden><span id="localSearchCount"></span><button id="clearLocalSearch" type="button">清空</button><button id="searchWeb" type="button">搜索互联网 ↗</button></div>
+    <div id="workspaceTabs" class="workspace-tabs" role="tablist" aria-label="工作空间"><button class="icon-button" id="navigationTab" role="tab" aria-selected="true" aria-controls="navigationPanel" data-view="navigation">网址导航</button><button class="icon-button" id="familyTab" role="tab" aria-selected="false" aria-controls="familyPanel" data-view="family">家庭事务</button></div>
     <div class="workspace-layout">
       <aside class="category-rail" id="categoryRail" aria-label="分类快速跳转"></aside>
-      <div class="navigation-column">
+      <div class="navigation-column" id="navigationPanel" aria-labelledby="navigationTab">
         <section id="pinnedSection" class="nav-group pinned-section" hidden><div class="group-heading"><span class="group-icon">★</span><h2>常用置顶</h2><div class="group-actions"><button class="group-sort desktop-only" id="sortPinned" aria-label="调整置顶顺序" title="调整置顶顺序（本浏览器）">↕</button></div><span class="count" id="pinnedCount"></span></div><div id="pinnedCards" class="cards"></div></section>
         <section id="navigation" class="navigation" aria-live="polite"></section>
       </div>
+      <aside id="familyPanel" class="family-panel" aria-label="家庭事务" aria-labelledby="familyTab"><div class="family-placeholder">家庭事务<span>稍后加载</span></div></aside>
     </div>
   </main>
   <section class="login-screen" id="loginScreen" hidden>

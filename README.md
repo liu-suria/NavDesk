@@ -80,3 +80,21 @@ Blob 没有原子比较交换；再次检查版本可减少冲突，但不能保
 ICO 备用资源自动提取最接近 32 像素的一帧，PNG 帧直接复用压缩字节，避免传输整个多分辨率图标。
 
 供应商无图标时的 1×1 透明占位图被识别为失败，页面保留网址名称首字，避免隐藏回退后留下空白。
+
+## 家庭事务与统一外观
+
+首页采用 Family Hub 的暖白/豆沙粉配色，深色主题同步；背景只有静态渐变，玻璃模糊限制在家庭事务面板和切换栏。桌面（≥1100px）为分类、网址、370px 家庭事务三栏；较窄屏幕为顶部「网址导航 / 家庭事务」Tab，保留各页滚动位置。家庭事务界面由按需 `family.mjs` / `family.css` 提供，支持待办分类、搜索、新增、详情、编辑、完成与恢复。完整附件、循环规则和统计设置仍通过原站管理。
+
+数据仍由 `https://home-ledger.667989.xyz/` 的原 API 和 `home-ledger-data` Blob 管理；NavDesk 不复制账本或循环维护逻辑。所有 `/api/family/*` 接口先验证导航登录，只允许固定上游和限定方法，并保留 HomeLedger revision 冲突响应。无需修改 HomeLedger 的部署或 iframe 安全策略。
+
+默认首次在家庭事务面板输入原 HomeLedger 密码，服务端获取上游会话并以 AES-GCM 加密存入 Secure/HttpOnly/SameSite=Strict 的 `__Host-navdesk_family` Cookie；会话最长 30 天，不向页面暴露上游 token，也不把账本缓存到 localStorage。可选在 NavDesk Secrets 配置已有 `HOMELEDGER_API_KEY` 自动连接，密钥只存在服务端。断开按钮用于本地会话连接；服务端密钥模式刷新后会自动连接。导航 SESSION_SECRET 轮换会使加密连接失效。
+
+移动端首次切到家庭事务才下载模块及读取账本；桌面在导航列表显示后利用空闲时间加载。账本连接失败不会隐藏或阻断网址。页面不会永久轮询。
+
+## 中文拼音搜索
+
+搜索网址名称、描述、分类与 URL 时支持中文、英文、全拼、首字母、大小写及中文/拼音混合输入，例如 `jingdong`、`jd`、`京dong`。纯中文查询保持文字精确包含关系。常见词组（重庆、银行、音乐等）补充组合读音；生僻字和多音词仍以字典/系统拼音排序为准。
+
+`search.mjs` 和静态拼音字典只在搜索框获得焦点或输入时下载，匹配索引按文本缓存，输入期间无需联网查询。移出的搜索高亮代码抵消了新增工作空间壳的首屏成本，首页仍受 14 KiB gzip 测试预算约束。
+
+静态拼音字典来自 [tiny-pinyin](https://github.com/creeperyang/pinyin) commit `b1b274fad82d6a52f4d5eacd8d94a61c4eb55800` 的 `src/dict.js`，仅改为 ES Module 导出；许可保留在 `vendor/pinyin-LICENSE.txt`。未新增运行时包依赖或外部 CDN 脚本。

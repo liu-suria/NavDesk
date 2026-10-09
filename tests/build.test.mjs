@@ -19,7 +19,7 @@ test('all generated module dependencies resolve and template tokens are replaced
  function inspect(path){if(seen.has(path))return;seen.add(path);const text=read(path);
   if(path.endsWith('.mjs'))execFileSync(process.execPath,['--check',fileURLToPath(new URL('../'+path,import.meta.url))]);
   assert.ok(!/__\w+_URL__|__EDITOR_HTML__|__TERMS_2026__/.test(text),path+' has no unresolved templates');
-  for(const match of text.matchAll(/["']\.?\/((?:calendar|editor|dialogs|manage|model|navschema|recovery)\.[a-f0-9]{12}\.mjs)["']/g)){
+  for(const match of text.matchAll(/["']\.?\/((?:calendar|editor|dialogs|manage|model|navschema|recovery|family|search|pinyin)\.[a-f0-9]{12}\.mjs)["']/g)){
    assert.ok(existsSync(new URL('../'+match[1],import.meta.url)),match[1]);inspect(match[1]);
   }
  }

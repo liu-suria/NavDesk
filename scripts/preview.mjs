@@ -11,6 +11,7 @@ const root = fileURLToPath(new URL('..', import.meta.url));
 let navigation = structuredClone(demoNavigation);
 let mode = 'normal', delay = 0;
 const requests = [];
+let family={revision:1,settings:{types:[{id:'subscription',name:'订阅'},{id:'reminder',name:'提醒'}]},events:[{id:'demo-overdue',title:'服务器续费',type:'subscription',date:'2026-10-08',amount:6,currency:'USD',status:'pending'},{id:'demo-today',title:'整理家庭资料',type:'reminder',date:'2026-10-09',status:'pending'},{id:'demo-future',title:'会员到期',type:'subscription',date:'2026-10-20',status:'pending'}]};
 const server = http.createServer(async (req,res) => {
   const url = new URL(req.url,'http://localhost');
   const respond=(code,value,headers={})=>{res.writeHead(code,{'Content-Type':'application/json','Cache-Control':'no-store',...headers});res.end(JSON.stringify(value))};
@@ -24,6 +25,20 @@ const server = http.createServer(async (req,res) => {
       const chunks=[];for await(const part of req)chunks.push(part);const raw=Buffer.concat(chunks).toString();
       if(url.pathname==='/api/auth/login')return JSON.parse(raw).password==='demo'?respond(200,{ok:true},{'Set-Cookie':'navdesk_demo=1; Path=/; HttpOnly; SameSite=Strict'}):respond(401,{error:'密码不正确'});
       if(url.pathname==='/api/auth/logout')return respond(200,{ok:true},{'Set-Cookie':'navdesk_demo=; Path=/; Max-Age=0'});
+      if(url.pathname.startsWith('/api/family/')){
+        if(!req.headers.cookie?.includes('navdesk_demo=1'))return respond(401,{error:'Unauthorized'});
+        if(url.pathname==='/api/family/login'){if(JSON.parse(raw).password!=='demo')return respond(401,{error:'家庭事务密码不正确'});return respond(200,{ok:true},{'Set-Cookie':'family_demo=1; Path=/; HttpOnly; SameSite=Strict'})}
+        if(url.pathname==='/api/family/logout')return respond(200,{ok:true},{'Set-Cookie':'family_demo=; Path=/; Max-Age=0'});
+        if(!req.headers.cookie?.includes('family_demo=1'))return respond(401,{error:'请连接家庭事务',code:'FAMILY_LOGIN_REQUIRED'});
+        if(url.pathname==='/api/family/ledger')return respond(200,family);
+        if(url.pathname==='/api/family/events'){
+          const input=JSON.parse(raw);if(input.revision!==family.revision)return respond(409,{error:'数据已更新'});
+          if(req.method==='POST')family.events.push({...input,id:'demo-'+Date.now(),status:'pending'});
+          else {const item=family.events.find(e=>e.id===input.id);if(!item)return respond(404,{error:'事项不存在'});if(input.action)item.status=input.action==='done'?'done':'pending';else Object.assign(item,input.event)}
+          family.revision++;return respond(200,{data:family});
+        }
+        return respond(404,{});
+      }
       if(url.pathname==='/api/calendar'){
         if(!req.headers.cookie?.includes('navdesk_demo=1'))return respond(401,{});
         const year=Number(url.searchParams.get('year'));if(!Number.isInteger(year)||year<1901||year>2100)return respond(400,{});
@@ -50,9 +65,9 @@ const server = http.createServer(async (req,res) => {
       return respond(200,navigation);
     }
     const path=url.pathname==='/'?'index.html':url.pathname==='/admin/'?'admin/index.html':url.pathname.slice(1);
-    if(!['index.html','admin/index.html','favicon.svg','site.webmanifest'].includes(path)&&!/^(manage|model|calendar|navschema|dialogs|recovery|editor)\.[a-f0-9]{12}\.mjs$/.test(path))return respond(404,{});
+    if(!['index.html','admin/index.html','favicon.svg','site.webmanifest'].includes(path)&&!/^family\.[a-f0-9]{12}\.css$/.test(path)&&!/^(manage|model|calendar|navschema|dialogs|recovery|editor|family|search|pinyin)\.[a-f0-9]{12}\.mjs$/.test(path))return respond(404,{});
     const body=await readFile(`${root}/${path}`);
-    res.writeHead(200,{'Content-Type':path.endsWith('.mjs')?'text/javascript; charset=utf-8':path.endsWith('.html')?'text/html; charset=utf-8':path.endsWith('.svg')?'image/svg+xml':'application/manifest+json'});res.end(body);
+    res.writeHead(200,{'Content-Type':path.endsWith('.mjs')?'text/javascript; charset=utf-8':path.endsWith('.html')?'text/html; charset=utf-8':path.endsWith('.svg')?'image/svg+xml':path.endsWith('.css')?'text/css; charset=utf-8':'application/manifest+json'});res.end(body);
   }catch{respond(500,{error:'Local preview error'})}
 });
 server.listen(8766,'127.0.0.1',()=>console.log('Local mock preview: http://127.0.0.1:8766/ — demo password: demo; no production data'));

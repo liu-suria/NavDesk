@@ -45,14 +45,8 @@ body { margin: 0; color: var(--text); min-height: 100vh; }
 .primary { height: 48px; border: 0; border-radius: 11px; background: linear-gradient(135deg, #d894a7, #ad6d82); color: white; font: 700 14px inherit; cursor: pointer; display: flex; justify-content: center; gap: 8px; align-items: center; }
 .primary:disabled { opacity: 0.6; }
 .form-message { min-height: 18px; margin: 1px 0 0; color: #ff8792; font-size: 12px; }
-@media (max-width: 900px) {
-.cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
 @media (max-width: 600px) {
-.container { padding: 19px 18px 56px; }
 .clock { display: none; }
-.cards { grid-template-columns: 1fr; }
-.navigation { gap: 31px; }
 .login-card { padding: 32px 25px; border-radius: 20px; }
 }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
@@ -81,7 +75,7 @@ body { margin: 0; color: var(--text); min-height: 100vh; }
 @media (max-width: 650px) {
 .topbar { position: static; flex-wrap: wrap; gap: 9px; padding: 10px 0 12px; }
 .brand { min-width: 0; flex: 1 1 auto; }
-.web-search { position: static; order: 3; flex: 0 0 100%; max-width: none; height: 54px; border-radius: 16px; box-shadow: 0 7px 22px rgba(106, 69, 83, 0.07); }
+.web-search { position: static; order: 3; flex: 0 0 100%; max-width: none;  }
 .web-search select { max-width: 115px; padding-left: 13px; font-size: 14px; }
 .web-search input { padding-inline: 14px; font-size: 15px; }
 .web-search button { width: 52px; font-size: 31px; }
@@ -167,12 +161,12 @@ body { background: var(--bg); }
 .app-shell .nav-group { scroll-margin-top: 72px; }
 .app-shell .container { padding-bottom: calc(28px + env(safe-area-inset-bottom)); }
 }
-:root { --bg: #0f1521; --surface: #182131; --surface-solid: #1e2b3e; --text: #edf2fa; --muted: #93a4bd; --line: #29364b; --accent: #9ebcf8; --accent-soft: #253655; --shadow: 0 12px 36px rgba(0,0,0,.16); }
-html[data-theme="light"] { --bg: #f5f7fb; --surface: #fff; --surface-solid: #fbfcff; --text: #21324b; --muted: #7a8aa1; --line: #e5eaf3; --accent: #496bc0; --accent-soft: #eef2fc; --shadow: 0 12px 36px rgba(37,59,99,.06); }
+:root { --bg: #171416; --surface: rgba(36,32,35,.84); --surface-solid: #242023; --text: #eee8eb; --muted: #ab929d; --line: #3b3337; --accent: #cf8da5; --accent-soft: #39262f; --shadow: 0 12px 36px rgba(0,0,0,.16); }
+html[data-theme="light"] { --bg: #faf7f8; --surface: rgba(255,255,255,.76); --surface-solid: #fff; --text: #272225; --muted: #84777d; --line: #eadfe3; --accent: #b85f7d; --accent-soft: #f6e9ee; --shadow: 0 12px 36px rgba(37,59,99,.06); }
 .container { max-width: 1440px; padding: 16px 36px 64px; }
 .topbar { height: 82px; gap: 28px; border-bottom: 1px solid var(--line); }
 .brand { font-size: 19px; gap: 12px; font-weight: 700; }
-.brand-mark { width: 34px; height: 34px; border-radius: 11px; background: #496bc0; font-size: 17px; }
+.brand-mark { width: 34px; height: 34px; border-radius: 11px; background: var(--accent); font-size: 17px; }
 .web-search { height: 44px; max-width: 560px; border-radius: 13px; border-color: var(--line); box-shadow: 0 2px 6px rgba(30,50,90,.02); }
 .web-search select { border-right: 1px solid var(--line); }
 .top-actions { gap: 8px; }
@@ -202,7 +196,7 @@ html[data-theme="light"] { --bg: #f5f7fb; --surface: #fff; --surface-solid: #fbf
 .card-copy strong { font-size: 13px; font-weight: 600; line-height: 1.3; }
 .card-copy small { font-size: 11px; line-height: 1.3; }
 .card-edit { right: 5px; top: 5px; font-size: 17px; color: var(--muted); }
-.primary { background: #496bc0; }
+.primary { background: var(--accent); }
 @media(max-width:960px) {
 .container { padding-inline: 24px; }
 .workspace-layout { grid-template-columns: 124px minmax(0,1fr); gap: 24px; }
@@ -345,3 +339,9 @@ button.browser-clock:focus-visible { outline: 2px solid var(--accent); outline-o
 .app-shell .group-heading h2::after {content:'⌄';margin-left:6px;font-size:11px}
 .app-shell .is-collapsed .group-heading h2::after {content:'›'}
 }
+
+/* Family Hub shell: static gradients; blur only on two small surfaces. */
+.app-shell{background:radial-gradient(ellipse at 95% 0%,var(--accent-soft),transparent 48%),var(--bg)}
+.app-shell .container{max-width:1800px}.workspace-tabs{position:sticky;top:0;z-index:12;display:flex;gap:6px;width:max-content;margin:18px auto 0;background:var(--surface);border-radius:12px;backdrop-filter:blur(8px)}.workspace-tabs [aria-selected=true]{background:var(--accent-soft);color:var(--accent)}.family-panel{display:none;min-width:0}.family-placeholder{padding:22px}.family-placeholder span{display:block}
+@media(min-width:1100px){.workspace-tabs{display:none}.app-shell .workspace-layout{grid-template-columns:136px minmax(0,1fr) 370px;gap:24px}.family-panel{display:block;position:sticky;top:20px;max-height:calc(100vh - 40px);align-self:start}}
+@media(max-width:1099px){body[data-workspace=family] :is(.category-rail,.navigation-column,.web-search,.top-actions,#localSearchStatus){display:none!important}body[data-workspace=family] .family-panel{display:block;grid-column:1/-1}body[data-workspace=family] .workspace-layout{display:block}}

@@ -115,6 +115,7 @@ function showNavigation(data) {
   setBrand(data.settings);
   render(data);
   performance.mark("navdesk-content-ready");
+  document.dispatchEvent(new Event("navdesk:ready"));
 }
 
 async function initialise(first = false) {
@@ -164,14 +165,11 @@ function searchWeb(){
  const query=$('#searchInput').value.trim();if(!query)return $('#searchInput').focus();
  const engine=$('#searchEngine').value;write('navdesk-search-engine',engine);window.open(`${searchUrls[engine]||searchUrls.google}${encodeURIComponent(query)}`,'_blank','noopener');
 }
-function highlightName(tile,terms){
- const node=$('strong',tile),name=tile.dataset.name;if(node.__query===terms.join(' '))return;node.__query=terms.join(' ');if(!terms.length&&node.textContent===name)return;node.replaceChildren();
- const lower=name.toLowerCase(),positions=new Set();for(const term of terms){let at=lower.indexOf(term);while(at>=0){for(let i=at;i<at+term.length;i++)positions.add(i);at=lower.indexOf(term,at+term.length)}}
- let start=0;while(start<name.length){const marked=positions.has(start);let end=start+1;while(end<name.length&&positions.has(end)===marked)end++;const text=name.slice(start,end);if(marked){const mark=document.createElement('mark');mark.textContent=text;node.append(mark)}else node.append(document.createTextNode(text));start=end}
-}
+let searchAPI,searchPromise;
+function prepareSearch(){return searchPromise??=import('/__SEARCH_URL__').then(m=>{searchAPI=m.createSearch();filterLocal()}).catch(()=>{searchPromise=null})}
 function filterLocal(){
  const terms=[...new Set($('#searchInput').value.trim().toLowerCase().split(/\s+/).filter(Boolean))];
- document.querySelectorAll('.nav-tile').forEach(tile=>{tile.hidden=!terms.every(term=>tile.dataset.search.includes(term));highlightName(tile,terms)});
+ document.querySelectorAll('.nav-tile').forEach(tile=>{tile.hidden=!terms.every(term=>(searchAPI?searchAPI.matches(tile.dataset.search,[term]):tile.dataset.search.includes(term)));searchAPI?.highlight(tile,terms)});
  let count=0;navigation.querySelectorAll('.nav-group').forEach(group=>{const visible=group.querySelectorAll('.nav-tile:not([hidden])').length;count+=visible;group.hidden=!!terms.length&&!visible;const collapsed=isMobileNavigation()&&!terms.length&&collapsedGroups.has(group.dataset.groupId);$('.cards',group).hidden=collapsed;$('h2',group).setAttribute('aria-expanded',String(!collapsed));group.classList.toggle('is-collapsed',collapsed)});
  $('#pinnedSection').hidden=!$('#pinnedCards .nav-tile:not([hidden])');
  $('#localSearchStatus').hidden=!terms.length;$('#localSearchCount').textContent=`找到 ${count} 个网址`;
@@ -179,7 +177,7 @@ function filterLocal(){
 const collapsedGroups=new Set((()=>{try{const value=JSON.parse(read('navdesk-collapsed-groups','[]'));return Array.isArray(value)?value:[]}catch{return []}})());
 function toggleCollapsed(id){if(!isMobileNavigation())return;if(collapsedGroups.has(id))collapsedGroups.delete(id);else collapsedGroups.add(id);write('navdesk-collapsed-groups',JSON.stringify([...collapsedGroups]));filterLocal()}
 matchMedia('(max-width:650px)').addEventListener('change',()=>{if(navigationData)filterLocal()});
-$('#searchInput').addEventListener('input',filterLocal);
+$('#searchInput').addEventListener('focus',prepareSearch);$('#searchInput').addEventListener('input',()=>{prepareSearch();filterLocal()});
 $('#clearLocalSearch').onclick=()=>{$('#searchInput').value='';filterLocal();$('#searchInput').focus()};
 $('#searchWeb').onclick=searchWeb;
 $('#webSearchForm').onsubmit=event=>{event.preventDefault();filterLocal()};
