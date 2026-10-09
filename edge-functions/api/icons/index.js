@@ -7,7 +7,7 @@ export async function onRequestGet(context) {
   try { host=iconHost(new URL(context.request.url).searchParams.get('url')); }
   catch { return new Response(null,{status:400,headers:{'Cache-Control':'no-store'}}); }
   const icon=await loadIcon(getNavigationStore(),host);
-  const headers={'X-NavDesk-Icon-Cache':'v2','Cache-Control':'private, max-age=86400','Vary':'Cookie, Authorization','X-Content-Type-Options':'nosniff'};
+  const headers={'X-NavDesk-Icon-Cache':'v3','Cache-Control':'private, max-age=86400','Vary':'Cookie, Authorization','X-Content-Type-Options':'nosniff'};
   if(!icon.body)return new Response(null,{status:404,headers:{...headers,'Cache-Control':'private, max-age=3600'}});
   const bytes=Uint8Array.from(atob(icon.body),c=>c.charCodeAt(0));
   return new Response(bytes,{headers:{...headers,'Content-Type':icon.type}});

@@ -26,7 +26,7 @@ export function compactIcon(bytes, type) {
   return {bytes:compact,type:'image/x-icon'};
 }
 export async function loadIcon(store, host, fetcher = fetch, now = Date.now(), force = false) {
-  const key = `icons/v2/${host}.json`;
+  const key = `icons/v3/${host}.json`;
   let cached;
   try { cached = await store.get(key, {type:'json'}); } catch {}
   if (!force && cached?.expires > now) return cached;
@@ -39,7 +39,7 @@ export async function loadIcon(store, host, fetcher = fetch, now = Date.now(), f
       `https://icons.duckduckgo.com/ip3/${encodeURIComponent(host)}.ico`,
     ]) {
       try {
-        const candidate = await fetcher(url, {redirect:'error', signal:AbortSignal.timeout(2500)});
+        const candidate = await fetcher(url, {redirect:'error', eo:{timeoutSetting:{connectTimeout:2500,readTimeout:2500,writeTimeout:2500}}});
         if (candidate.ok && /^image\//.test(candidate.headers.get('content-type') || '')) { response=candidate; break; }
       } catch (error) {failures.push(error.name+': '+error.message)}
     }
