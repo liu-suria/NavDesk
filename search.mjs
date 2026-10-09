@@ -20,7 +20,7 @@ export function matchesText(text,terms){
  const normalized=normalize(text);
  if(!cache.has(text)){const p=romanize(normalized);cache.set(text,{...p,text:normalized})}
  const entry=cache.get(text);
- return terms.every(value=>{const term=normalize(value);if(/\p{Script=Han}/u.test(term)&&!/[a-z]/.test(term))return entry.text.includes(term);return entry.text.includes(term)||entry.full.includes(romanize(term).full)||entry.initials.includes(romanize(term).full)});
+ return terms.every(value=>{const term=normalize(value);if(/\p{Script=Han}/u.test(term)&&!/[a-z]/.test(term))return entry.text.includes(term);return entry.text.includes(term)||(/[aeiouv]/.test(term)&&entry.full.includes(romanize(term).full))||entry.initials.includes(romanize(term).full)});
 }
 const $=(selector,root)=>root.querySelector(selector);
 function highlightName(tile,terms){

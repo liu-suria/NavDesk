@@ -10,5 +10,5 @@ test('mixed Latin labels and common multi-character readings retain meaning',()=
  assert.equal(romanize('重庆银行').full,'chongqingyinhang');assert.equal(matchesText('重庆银行',['cqyh']),true);
  assert.equal(matchesText('HHanClub PT 影音视频',['hhanclub']),true);
  assert.equal(matchesText('OpenList 管理后台',['openlist','glht']),true);
- assert.equal(matchesText('京东 购物',['淘宝']),false);assert.equal(matchesText('百度',['百杜']),false);
+ assert.equal(matchesText('OpenList 管理后台 自有项目',['gm']),false);assert.equal(matchesText('京东 购物',['淘宝']),false);assert.equal(matchesText('百度',['百杜']),false);
 });

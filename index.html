@@ -306,7 +306,7 @@ function searchWeb(){
  const engine=$('#searchEngine').value;write('navdesk-search-engine',engine);window.open(`${searchUrls[engine]||searchUrls.google}${encodeURIComponent(query)}`,'_blank','noopener');
 }
 let searchAPI,searchPromise;
-function prepareSearch(){return searchPromise??=import('/search.4c3019c6e501.mjs').then(m=>{searchAPI=m.createSearch();filterLocal()}).catch(()=>{searchPromise=null})}
+function prepareSearch(){return searchPromise??=import('/search.c9e05351163c.mjs').then(m=>{searchAPI=m.createSearch();filterLocal()}).catch(()=>{searchPromise=null})}
 function filterLocal(){
  const terms=[...new Set($('#searchInput').value.trim().toLowerCase().split(/\s+/).filter(Boolean))];
  document.querySelectorAll('.nav-tile').forEach(tile=>{tile.hidden=!terms.every(term=>(searchAPI?searchAPI.matches(tile.dataset.search,[term]):tile.dataset.search.includes(term)));searchAPI?.highlight(tile,terms)});
