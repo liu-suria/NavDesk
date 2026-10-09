@@ -341,7 +341,7 @@ async function runEditor(action,...args){
  }catch{pageMessage('编辑工具加载失败，请重试')}
 }
 for(const button of [$('#calendarButton'),$('#timeButton')]){
- const hover=()=>matchMedia('(hover:hover) and (pointer:fine)').matches;
+ const hover=()=>matchMedia('(min-width:651px) and (hover:hover) and (pointer:fine)').matches;
  const show=async floating=>{try{const calendar=await import('/calendar.bce298ef4e19.mjs');if(!floating||button.matches(':hover,:focus-visible'))calendar.open(floating?button:null)}catch{pageMessage('日历加载失败，请稍后重试')}};
  button.onclick=()=>{if(!hover())show(false)};button.onpointerenter=()=>{if(hover())show(true)};button.onfocus=()=>{if(hover())show(true)};
 }
