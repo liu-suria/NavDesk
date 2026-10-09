@@ -98,3 +98,6 @@ ICO 备用资源自动提取最接近 32 像素的一帧，PNG 帧直接复用�
 `search.mjs` 和静态拼音字典只在搜索框获得焦点或输入时下载，匹配索引按文本缓存，输入期间无需联网查询。移出的搜索高亮代码抵消了新增工作空间壳的首屏成本，首页仍受 14 KiB gzip 测试预算约束。
 
 静态拼音字典来自 [tiny-pinyin](https://github.com/creeperyang/pinyin) commit `b1b274fad82d6a52f4d5eacd8d94a61c4eb55800` 的 `src/dict.js`，仅改为 ES Module 导出；许可保留在 `vendor/pinyin-LICENSE.txt`。未新增运行时包依赖或外部 CDN 脚本。
+
+### HomeLedger 直接嵌入
+右侧与手机家庭事务 Tab 直接加载 `https://home-ledger.667989.xyz/?embed=nav`，复用原站登录、附件、统计和完整事项操作。HomeLedger 仅允许导航站作为跨站父页面，浅色/深色通过校验来源的消息同步。桌面导航就绪后加载，手机首次切换时加载；登录凭据由原站管理。旧代理接口保留兼容，不再作为默认 UI。

@@ -1,3 +1,4 @@
+// NavDesk JavaScript module v2
 export function mountFamily(panel){let frame;
 const origin='https://home-ledger.667989.xyz';
 const theme=()=>frame?.contentWindow?.postMessage({type:'navdesk:theme',theme:document.documentElement.dataset.theme==='dark'?'dark':'light'},origin);

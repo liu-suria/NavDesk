@@ -347,3 +347,6 @@ button.browser-clock:focus-visible { outline: 2px solid var(--accent); outline-o
 @media(max-width:1099px){body[data-workspace=family] :is(.category-rail,.navigation-column,.web-search,.top-actions,#localSearchStatus){display:none!important}body[data-workspace=family] .family-panel{display:block;grid-column:1/-1}body[data-workspace=family] .workspace-layout{display:block}}
 
 html[data-theme=dark] .primary{color:var(--bg)}
+
+.family-frame{display:block;width:100%;height:calc(100dvh - 70px);min-height:420px;border:1px solid var(--line);border-radius:18px;background:var(--surface)}
+@media(max-width:1099px){.family-frame{height:calc(100dvh - 150px);min-height:500px}}

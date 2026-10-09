@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createSession} from '../edge-functions/_lib.js';
 import {sealSession,openSession,proxyFamily,loginFamily} from '../edge-functions/_family.js';
-import {eventBuckets} from '../family.mjs';
+import {readFileSync} from 'node:fs';
 const env={ADMIN_PASSWORD:'demo',SESSION_SECRET:'test-nav-secret'};
 async function context(path='/ledger',method='GET',extra={},body){const token=await createSession(env.SESSION_SECRET);return {env,request:new Request('https://nav.example/api/family'+path,{method,headers:{Cookie:'__Host-navdesk_session='+token,...extra},...(body?{body:JSON.stringify(body)}:{})})}}
 test('family sessions are encrypted, scoped to secret, expire, and reject tampering',async()=>{
@@ -32,7 +32,9 @@ test('login wraps upstream HttpOnly cookie and never returns password or plain u
  });assert.equal(response.status,200);const cookie=response.headers.get('set-cookie');assert.match(cookie,/HttpOnly; Secure; SameSite=Strict/);assert.ok(!cookie.includes(plain));assert.equal(await openSession(cookie.split('=')[1].split(';')[0],env.SESSION_SECRET),plain);
  assert.deepEqual(await response.json(),{ok:true});
 });
-test('family buckets separate overdue/today/future while excluding completed and archived',()=>{
- const events=[{id:'old',date:'2026-10-08'},{id:'today',date:'2026-10-09'},{id:'future',date:'2026-10-20'},{id:'done',date:'2026-10-08',status:'done'},{id:'archive',date:'2026-10-09',archived:true}];
- assert.deepEqual(eventBuckets(events,'2026-10-09').map(b=>b.items.map(e=>e.id)),[['old'],['today'],['future']]);
+test('embedded family reuses the fixed origin and validates message source',()=>{
+ const source=readFileSync(new URL('../family.mjs',import.meta.url),'utf8');
+ assert.ok(source.includes("https://home-ledger.667989.xyz"));
+ assert.ok(source.includes("event.origin===origin&&event.source===frame?.contentWindow"));
+ assert.ok(source.includes("/?embed=nav"));
 });
