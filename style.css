@@ -122,12 +122,9 @@ body { background: var(--bg); }
 .login-card input,.primary { border-radius: 7px; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 @media(max-width:650px) {
-.container { padding: 0 15px 36px; }
 .topbar { height: auto; min-height: 0; }
-.workspace-layout { display: block; margin-top: 8px; }
 .category-rail { flex-wrap: nowrap; overflow-x: auto; padding: 10px 0 14px; }
 .category-rail a { font-size: 12px; }
-.cards { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
 .nav-card { min-height: 76px; padding: 12px 26px 12px 9px; gap: 8px; }
 .site-icon { flex-basis: 26px; height: 26px; }
 .card-edit { opacity: 1; right: 0; top: 0; width: 30px; height: 34px; }
@@ -207,7 +204,7 @@ html[data-theme="light"] { --bg: #faf7f8; --surface: rgba(255,255,255,.76); --su
 .app-shell .topbar { padding: 18px 0 16px; gap: 14px; height: auto; border-bottom: 0; }
 .app-shell .brand { gap: 10px; }
 .app-shell .brand-mark { width: 32px; height: 32px; border-radius: 10px; }
-.app-shell .icon-button { width: 40px; min-width: 40px; height: 40px; min-height: 40px; border-radius: 12px; }
+.app-shell .icon-button:not([role=tab]) { width: 40px; min-width: 40px; height: 40px; min-height: 40px; border-radius: 12px; }
 .app-shell .web-search { height: 48px; border-radius: 14px; max-width: none; }
 .app-shell .workspace-layout { display: block; }
 .app-shell .category-rail { border: 0; gap: 8px; background: var(--bg); }
@@ -342,8 +339,8 @@ button.browser-clock:focus-visible { outline: 2px solid var(--accent); outline-o
 
 /* Family Hub shell: static gradients; blur only on two small surfaces. */
 .app-shell{background:radial-gradient(ellipse at 95% 0%,var(--accent-soft),transparent 48%),var(--bg)}
-.app-shell .container{max-width:1800px}.workspace-tabs{position:sticky;top:0;z-index:12;display:flex;gap:6px;width:max-content;margin:18px auto 0;background:var(--surface);border-radius:12px;backdrop-filter:blur(8px)}.workspace-tabs [aria-selected=true]{background:var(--accent-soft);color:var(--accent)}.family-panel{display:none;min-width:0}.family-placeholder{padding:22px}.family-placeholder span{display:block}
-@media(min-width:1100px){.workspace-tabs{display:none}.app-shell .workspace-layout{grid-template-columns:136px minmax(0,1fr) 370px;gap:24px}.family-panel{display:block;position:sticky;top:20px;max-height:calc(100vh - 40px);align-self:start}}
+.app-shell .container{max-width:1800px}.workspace-tabs{position:sticky;top:0;z-index:12;display:flex;gap:6px;width:max-content;margin:18px auto 0;background:var(--surface);border-radius:12px;backdrop-filter:blur(8px)}.workspace-tabs button{white-space:nowrap;flex-shrink:0;width:auto;font-size:14px}.workspace-tabs [aria-selected=true]{background:var(--accent-soft);color:var(--accent)}.family-panel{display:none;min-width:0}
+@media(min-width:1100px){.app-shell .container{max-width:none;padding-right:0}.topbar{margin-right:24px}.family-frame{border-radius:18px 0 0 18px}.workspace-tabs{display:none}.app-shell .workspace-layout{grid-template-columns:136px minmax(0,1fr) 370px;gap:24px}.family-panel{display:block;position:sticky;top:20px;max-height:calc(100vh - 40px);align-self:start}}
 @media(max-width:1099px){body[data-workspace=family] :is(.category-rail,.navigation-column,.web-search,.top-actions,#localSearchStatus){display:none!important}body[data-workspace=family] .family-panel{display:block;grid-column:1/-1}body[data-workspace=family] .workspace-layout{display:block}}
 
 html[data-theme=dark] .primary{color:var(--bg)}
