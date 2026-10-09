@@ -5,7 +5,7 @@ window.navdeskIcons = (() => {
   function source(link) {
     const key=link.url+'|'+(link.icon||'');if(refreshed.has(key))return refreshed.get(key);
     if(link.icon)return link.icon;
-    try { const url=new URL(link.url); return '/api/icons?v=3&url='+encodeURIComponent(url.origin); } catch{return ''}
+    try { const url=new URL(link.url); return '/api/icons?v=4&url='+encodeURIComponent(url.origin); } catch{return ''}
   }
   function pump(){
     while(active<4 && queue.length){
