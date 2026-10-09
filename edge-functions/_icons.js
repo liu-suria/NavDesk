@@ -41,6 +41,7 @@ export async function loadIcon(store, host, fetcher = fetch, now = Date.now(), f
       try {
         const candidate = await fetcher(url, {redirect:'error', eo:{timeoutSetting:{connectTimeout:2500,readTimeout:2500,writeTimeout:2500}}});
         if (candidate.ok && /^image\//.test(candidate.headers.get('content-type') || '')) { response=candidate; break; }
+        failures.push(new URL(url).hostname+': HTTP '+candidate.status+' '+candidate.headers.get('content-type')); 
       } catch (error) {failures.push(error.name+': '+error.message)}
     }
     if (!response) throw new Error('Providers unavailable: '+failures.join('; '));
