@@ -198,6 +198,10 @@ async function runEditor(action,...args){
   const editor=await editorPromise;if(!isMobileNavigation())editor[action](...args);
  }catch{pageMessage('编辑工具加载失败，请重试')}
 }
-for(const button of [$('#calendarButton'),$('#timeButton')])button.onclick=async()=>{button.disabled=true;try{const calendar=await import('/__CALENDAR_URL__');calendar.open()}catch{pageMessage('日历加载失败，请稍后重试')}finally{button.disabled=false}};
+for(const button of [$('#calendarButton'),$('#timeButton')]){
+ const hover=()=>matchMedia('(min-width:1100px) and (hover:hover)').matches;
+ const show=async floating=>{try{const calendar=await import('/__CALENDAR_URL__');if(!floating||button.matches(':hover,:focus-visible'))calendar.open(floating?button:null)}catch{pageMessage('日历加载失败，请稍后重试')}};
+ button.onclick=()=>{if(!hover())show(false)};button.onpointerenter=()=>{if(hover())show(true)};button.onfocus=()=>{if(hover())show(true)};
+}
 
 const backTop=$('#backToTop');window.addEventListener('scroll',()=>{backTop.hidden=scrollY<500},{passive:true});backTop.onclick=()=>window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'instant':'smooth'});
