@@ -53,7 +53,8 @@ export async function createSession(secret) {
 }
 
 export async function isAuthenticated(request, secret) {
-  const token = parseCookies(request)[COOKIE_NAME];
+  const bearer = request.headers.get("Authorization");
+  const token = bearer?.startsWith("Bearer ") ? bearer.slice(7) : parseCookies(request)[COOKIE_NAME];
   if (!token) return false;
   const [issuedAtText, nonce, signature, ...extra] = token.split(".");
   const issuedAt = Number(issuedAtText);
@@ -67,6 +68,8 @@ export function clearSessionCookie() { return `${COOKIE_NAME}=; Path=/; Max-Age=
 
 export async function requireAuth(context) {
   try {
+    const origin = context.request.headers.get('Origin');
+    if (!['GET','HEAD','OPTIONS'].includes(context.request.method) && origin && origin !== new URL(context.request.url).origin) return {response:json({error:'Forbidden origin'},403)};
     const { sessionSecret } = getSecrets(context);
     if (await isAuthenticated(context.request, sessionSecret)) return { sessionSecret };
     return { response: json({ error: "Unauthorized" }, 401) };

@@ -5,13 +5,24 @@ export function iconHost(value) {
   return host;
 }
 export async function loadIcon(store, host, fetcher = fetch, now = Date.now(), force = false) {
-  const key = `icons/v1/${host}.json`;
+  const key = `icons/v2/${host}.json`;
   let cached;
   try { cached = await store.get(key, {type:'json'}); } catch {}
   if (!force && cached?.expires > now) return cached;
   try {
     // Fixed upstream only: never fetch arbitrary user URLs or internal network addresses.
-    const response = await fetcher(`https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=64`, {redirect:'follow', signal:AbortSignal.timeout(5000)});
+    let response;
+    // Request small provider-rendered rasters; no arbitrary destination or redirects.
+    for (const url of [
+      `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://${encodeURIComponent(host)}&size=32`,
+      `https://icons.duckduckgo.com/ip3/${encodeURIComponent(host)}.ico`,
+    ]) {
+      try {
+        const candidate = await fetcher(url, {redirect:'error', signal:AbortSignal.timeout(2500)});
+        if (candidate.ok && /^image\//.test(candidate.headers.get('content-type') || '')) { response=candidate; break; }
+      } catch {}
+    }
+    if (!response) throw new Error('Providers unavailable');
     const type = (response.headers.get('content-type') || '').split(';')[0];
     if (!response.ok || !['image/png','image/jpeg','image/webp','image/x-icon','image/vnd.microsoft.icon'].includes(type)) throw new Error('Not an image');
     const reader = response.body.getReader();
@@ -23,7 +34,11 @@ export async function loadIcon(store, host, fetcher = fetch, now = Date.now(), f
     let binary = ''; for(const byte of bytes) binary += String.fromCharCode(byte);
     cached = {type,body:btoa(binary),expires:now+30*DAY};
   } catch {
-    if (cached?.body) return force?{...cached,refreshFailed:true}:cached;
+    if (cached?.body) {
+      const stale={...cached,expires:now+3600000};
+      try {await store.setJSON(key,stale)} catch {}
+      return force?{...stale,refreshFailed:true}:stale;
+    }
     cached = {body:null,expires:now+3600000};
   }
   try { await store.setJSON(key,cached); } catch { /* A cache write must not hide a valid icon. */ }
