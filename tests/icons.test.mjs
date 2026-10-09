@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {iconHost,loadIcon,compactIcon} from '../edge-functions/_icons.js';
+import {iconHost,loadIcon,compactIcon,placeholder} from '../edge-functions/_icons.js';
 function store(){const data=new Map();return {data,get:async key=>data.get(key),setJSON:async(key,value)=>data.set(key,value)}}
 test('cache miss fetches once; subsequent reads use persistent cache',async()=>{const s=store();let calls=0;const f=async()=>{calls++;return new Response(new Uint8Array([1,2,3]),{headers:{'Content-Type':'image/png'}})};const first=await loadIcon(s,'example.com',f,100);assert.equal(first.body,'AQID');assert.deepEqual(await loadIcon(s,'example.com',f,200),first);assert.equal(calls,1)});
 test('failed icons have a negative cache and never block navigation',async()=>{const s=store();let calls=0;const f=async()=>{calls++;throw Error('timeout')};assert.equal((await loadIcon(s,'example.com',f,100)).body,null);await loadIcon(s,'example.com',f,200);assert.equal(calls,3)});
@@ -37,4 +37,9 @@ test('ICO compaction selects one 32px frame and preserves PNG bytes',()=>{
 test('edge streams with ArrayBuffer chunks produce valid cached bytes',async()=>{
  const body=new ReadableStream({start(controller){controller.enqueue(new Uint8Array([1,2,3]).buffer);controller.close()}});
  const icon=await loadIcon(store(),'example.com',async()=>new Response(body,{headers:{'Content-Type':'image/png'}}));assert.equal(icon.body,'AQID');
+});
+
+test('transparent one-pixel provider placeholders retain the letter fallback',async()=>{
+ const bytes=new Uint8Array(24);bytes.set([137,80,78,71]);const v=new DataView(bytes.buffer);v.setUint32(16,1);v.setUint32(20,1);assert.equal(placeholder(bytes,'image/png'),true);
+ const icon=await loadIcon(store(),'example.com',async()=>new Response(bytes,{headers:{'Content-Type':'image/png'}}));assert.equal(icon.body,null);
 });

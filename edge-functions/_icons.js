@@ -25,10 +25,16 @@ export function compactIcon(bytes, type) {
   new DataView(compact.buffer).setUint32(18,22,true);compact.set(body,22);
   return {bytes:compact,type:'image/x-icon'};
 }
+export function placeholder(bytes,type) {
+  if(type!=='image/png'||bytes.length<24||bytes[0]!==137||bytes[1]!==80)return false;
+  const view=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);
+  return view.getUint32(16)<8||view.getUint32(20)<8;
+}
 export async function loadIcon(store, host, fetcher = fetch, now = Date.now(), force = false) {
   const key = `icons/v4/${host}.json`;
   let cached;
   try { cached = await store.get(key, {type:'json'}); } catch {}
+  if(cached?.body && placeholder(Uint8Array.from(atob(cached.body),c=>c.charCodeAt(0)),cached.type))cached={body:null,expires:now+3600000};
   if (!force && cached?.expires > now) return cached;
   try {
     // Fixed upstream only: never fetch arbitrary user URLs or internal network addresses.
@@ -56,6 +62,7 @@ export async function loadIcon(store, host, fetcher = fetch, now = Date.now(), f
     for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length}
     let binary = '';
     const compact=compactIcon(bytes,type);
+    if(placeholder(compact.bytes,compact.type))throw new Error('Provider has no icon');
     binary='';for(const byte of compact.bytes)binary+=String.fromCharCode(byte);
     cached = {type:compact.type,body:btoa(binary),expires:now+30*DAY};
   } catch (error) {

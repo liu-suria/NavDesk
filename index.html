@@ -79,7 +79,7 @@ window.navdeskIcons = (() => {
   function source(link) {
     const key=link.url+'|'+(link.icon||'');if(refreshed.has(key))return refreshed.get(key);
     if(link.icon)return link.icon;
-    try { const url=new URL(link.url); return '/api/icons?v=6&url='+encodeURIComponent(url.origin); } catch{return ''}
+    try { const url=new URL(link.url); return '/api/icons?v=7&url='+encodeURIComponent(url.origin); } catch{return ''}
   }
   function pump(){
     while(active<4 && queue.length){
@@ -90,7 +90,7 @@ window.navdeskIcons = (() => {
       let done=false;
       const finish=()=>{if(done)return;done=true;clearTimeout(timer);active--;pump()};
       const timer=setTimeout(()=>{image.remove();image.src='';finish()},10000);
-      image.onload=()=>{if(node.isConnected)node.classList.add('icon-ready');finish()};
+      image.onload=()=>{if(image.naturalWidth<8||image.naturalHeight<8)image.remove();else if(node.isConnected)node.classList.add('icon-ready');finish()};
       image.onerror=()=>{image.remove();finish()};
       node.append(image);image.src=url;
     }
