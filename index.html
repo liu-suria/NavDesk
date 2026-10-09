@@ -340,7 +340,7 @@ async function runEditor(action,...args){
   const editor=await editorPromise;if(!isMobileNavigation())editor[action](...args);
  }catch{pageMessage('编辑工具加载失败，请重试')}
 }
-for(const button of [$('#calendarButton'),$('#timeButton')])button.onclick=async()=>{button.disabled=true;try{const calendar=await import('/calendar.cdc407a4b7a9.mjs');calendar.open()}catch{pageMessage('日历加载失败，请稍后重试')}finally{button.disabled=false}};
+for(const button of [$('#calendarButton'),$('#timeButton')])button.onclick=async()=>{button.disabled=true;try{const calendar=await import('/calendar.dac9f18990f5.mjs');calendar.open()}catch{pageMessage('日历加载失败，请稍后重试')}finally{button.disabled=false}};
 
 const backTop=$('#backToTop');window.addEventListener('scroll',()=>{backTop.hidden=scrollY<500},{passive:true});backTop.onclick=()=>window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'instant':'smooth'});
 </script>
