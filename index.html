@@ -342,7 +342,7 @@ async function runEditor(action,...args){
 }
 for(const button of [$('#calendarButton'),$('#timeButton')]){
  const hover=()=>matchMedia('(min-width:651px) and (hover:hover) and (pointer:fine)').matches;
- const show=async floating=>{try{const calendar=await import('/calendar.bce298ef4e19.mjs');if(!floating||button.matches(':hover,:focus-visible'))calendar.open(floating?button:null)}catch{pageMessage('日历加载失败，请稍后重试')}};
+ const show=async floating=>{try{const calendar=await import('/calendar.2ef95ef041e3.mjs');if(!floating||button.matches(':hover,:focus-visible'))calendar.open(floating?button:null)}catch{pageMessage('日历加载失败，请稍后重试')}};
  button.onclick=()=>{if(!hover())show(false)};button.onpointerenter=()=>{if(hover())show(true)};button.onfocus=()=>{if(hover())show(true)};
 }
 
