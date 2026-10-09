@@ -22,7 +22,7 @@ function formatClock() {
   const weekday=part('weekday').replace('星期','周');
   $('#clockDate').textContent=clockDateFormat.format(now);
   $('#clockTime').textContent=part('hour')+':'+part('minute')+':'+part('second');
-  $('#clock').dateTime=now.toISOString();
+  $('#clock').dateTime=$('#clockTime').dateTime=now.toISOString();
   const key=now.toDateString();if(key!==lunarDateKey){$('#clockLunar').textContent=formatLunar(now)+'['+weekday+']';lunarDateKey=key}
 }
 function setTheme(theme) { document.documentElement.dataset.theme = theme; write("navdesk-theme", theme); }
@@ -38,6 +38,7 @@ function setBrand(settings = {}) {
   const name = String(settings.brandName || "NavDesk").trim() || "NavDesk";
   const mark = [...name][0]?.toUpperCase() || "N";
   document.title = `${name} · 个人导航`;
+  $("#siteTitle").textContent=name;
   const loginBrandName = $("#loginBrandName");
   if (loginBrandName) loginBrandName.textContent = name;
   $("#loginBrandMark").textContent = mark;
@@ -75,9 +76,6 @@ function render(data) {
     $(".group-icon", node).style.background = `${group.color}22`;
     $(".group-icon", node).style.color = group.color;
     $("h2", node).textContent = group.name; $(".count", node).textContent = String(links.length).padStart(2, "0");
-    $(".group-sort",node).onclick=()=>runEditor('openSort',group.id);
-    $(".group-add",node).onclick=()=>runEditor('openQuickEditor',group.id);
-    $(".group-add",node).setAttribute("aria-label",`添加网址到${group.name}`);
     const cards = $(".cards", node);
     links.forEach(link=>cards.append(createTile(group,link)));
     const heading=$('h2',node);heading.tabIndex=0;heading.setAttribute('role','button');heading.setAttribute('aria-label',`展开或折叠${group.name}`);heading.onclick=()=>toggleCollapsed(group.id);heading.onkeydown=event=>{if(isMobileNavigation()&&['Enter',' '].includes(event.key)){event.preventDefault();toggleCollapsed(group.id)}};
@@ -183,9 +181,9 @@ $('#searchWeb').onclick=searchWeb;
 $('#webSearchForm').onsubmit=event=>{event.preventDefault();filterLocal()};
 const pinnedLinks=pinPort.links;
 const navigationPort=createNavigationPort({get:()=>navigationData,show:showNavigation,request});
-const services={navigation:navigationPort,pins:pinPort,icons:window.navdeskIcons,notify:pageMessage};
+const services={navigation:navigationPort,pins:pinPort,icons:window.navdeskIcons,notify:pageMessage,edit:(action,...args)=>runEditor(action,...args)};
 const openNavManager=createManagerLoader(services);
-$('#manageNav').onclick=()=>openNavManager('batch');
+$('#manageNav').onclick=()=>openNavManager('settings');
 $("#searchEngine").value = read("navdesk-search-engine") || "google";
 performance.mark("navdesk-shell-ready");
 initialise(true);
@@ -200,8 +198,6 @@ async function runEditor(action,...args){
   const editor=await editorPromise;if(!isMobileNavigation())editor[action](...args);
  }catch{pageMessage('编辑工具加载失败，请重试')}
 }
-$('#sortGroups').onclick=()=>openNavManager('categories');
-$('#sortPinned').onclick=()=>runEditor('openSort','__pinned');
-$('#calendarButton').onclick=async()=>{const button=$('#calendarButton');button.disabled=true;try{const calendar=await import('/__CALENDAR_URL__');calendar.open()}catch{pageMessage('日历加载失败，请稍后重试')}finally{button.disabled=false}};
+for(const button of [$('#calendarButton'),$('#timeButton')])button.onclick=async()=>{button.disabled=true;try{const calendar=await import('/__CALENDAR_URL__');calendar.open()}catch{pageMessage('日历加载失败，请稍后重试')}finally{button.disabled=false}};
 
 const backTop=$('#backToTop');window.addEventListener('scroll',()=>{backTop.hidden=scrollY<500},{passive:true});backTop.onclick=()=>window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'instant':'smooth'});

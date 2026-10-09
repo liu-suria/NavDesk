@@ -21,7 +21,7 @@ const modelURL=asset('model',read('model.mjs').replace('./edge-functions/_naviga
 const manageURL=asset('manage',lazyStyle(read('manage.mjs').replace('__MODEL_URL__',modelURL)));
 const editorURL=asset('editor',lazyStyle(read('editor.mjs').replace('__EDITOR_HTML__',()=>JSON.stringify(read('templates/editor.html'))).replaceAll('__MODEL_URL__',modelURL)));
 for (const [name, output, script, styles] of [
-  ['home', 'index.html', 'app.js', ['style.css']],
+  ['home', 'index.html', 'app.js', ['style.css','home-header.css']],
   ['admin', 'admin/index.html', 'admin/app.js', ['style.css', 'admin/admin.css']],
 ]) {
   const html = read(`templates/${name}.html`)

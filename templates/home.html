@@ -15,7 +15,8 @@
 <body class="app-shell">
   <main class="container" id="app">
     <header class="topbar">
-      <button type="button" id="calendarButton" class="brand browser-clock" aria-label="打开万年历，查看放假与调休" aria-haspopup="dialog" title="点击查看万年历"><time id="clock" class="clock"><span id="clockDate"></span><span id="clockLunar"></span><span id="clockTime"></span></time></button>
+      <strong id="siteTitle" class="site-title">NavDesk</strong>
+      <button type="button" id="calendarButton" class="browser-clock" aria-label="日期：打开日历" aria-haspopup="dialog"><time id="clock"><span id="clockDate"></span><span id="clockLunar"></span></time></button>
       <form class="web-search" id="webSearchForm" role="search">
         <label class="sr-only" for="searchEngine">搜索引擎</label>
         <select id="searchEngine" aria-label="选择搜索引擎">
@@ -27,7 +28,8 @@
         <input id="searchInput" type="search" autocomplete="off" placeholder="搜索收藏的网址…" aria-label="搜索关键词" />
         <button type="submit" aria-label="搜索">⌕</button>
       </form>
-      <div class="top-actions"><button type="button" class="icon-button desktop-only" id="manageNav" title="批量添加、导入、回收站与检查">整理网址</button><button class="icon-button" id="sortGroups" type="button" title="分类管理：添加、删除、排序" aria-label="分类管理">↕</button><button class="icon-button" id="themeButton" title="切换主题">◐</button></div>
+      <button type="button" id="timeButton" class="browser-clock" aria-label="时间：打开日历" aria-haspopup="dialog"><time id="clockTime"></time></button>
+      <div class="top-actions"><button type="button" class="icon-button desktop-only" id="manageNav" title="新增网址、调整顺序与导航管理" aria-label="导航设置">⚙ 设置</button><button class="icon-button" id="themeButton" title="切换主题">◐</button></div>
     </header>
     <div class="boot-screen" id="bootScreen" role="status"><span class="brand-mark">N</span><span id="bootMessage">正在打开导航…</span><button class="icon-button" id="retryButton" hidden>重新加载</button></div>
     <div id="localSearchStatus" class="search-status" hidden><span id="localSearchCount"></span><button id="clearLocalSearch" type="button">清空</button><button id="searchWeb" type="button">搜索互联网 ↗</button></div>
@@ -35,7 +37,7 @@
     <div class="workspace-layout">
       <aside class="category-rail" id="categoryRail" aria-label="分类快速跳转"></aside>
       <div class="navigation-column" id="navigationPanel" aria-labelledby="navigationTab">
-        <section id="pinnedSection" class="nav-group pinned-section" hidden><div class="group-heading"><span class="group-icon">★</span><h2>常用置顶</h2><div class="group-actions"><button class="group-sort desktop-only" id="sortPinned" aria-label="调整置顶顺序" title="调整置顶顺序（本浏览器）">↕</button></div><span class="count" id="pinnedCount"></span></div><div id="pinnedCards" class="cards"></div></section>
+        <section id="pinnedSection" class="nav-group pinned-section" hidden><div class="group-heading"><span class="group-icon">★</span><h2>常用置顶</h2><span class="count" id="pinnedCount"></span></div><div id="pinnedCards" class="cards"></div></section>
         <section id="navigation" class="navigation" aria-live="polite"></section>
       </div>
       <aside id="familyPanel" class="family-panel" aria-label="家庭事务" aria-labelledby="familyTab"><div class="family-placeholder">家庭事务<span>稍后加载</span></div></aside>
@@ -44,7 +46,7 @@
   <section class="login-screen" id="loginScreen" hidden>
     <div class="login-card"><span class="brand-mark large" id="loginBrandMark">N</span><p class="eyebrow">PRIVATE NAVIGATION</p><h1>你的个人导航台</h1><p>输入密码，进入仅属于你的工作空间。</p><form id="loginForm"><input id="password" type="password" autocomplete="current-password" placeholder="请输入密码" required /><button class="primary" type="submit">进入 <span id="loginBrandName">NavDesk</span> <span>→</span></button><p class="form-message" id="loginMessage"></p></form></div>
   </section>
-  <template id="groupTemplate"><section class="nav-group"><div class="group-heading"><span class="group-icon"></span><h2></h2><div class="group-actions"><button class="group-add" type="button" title="添加网址" aria-label="添加网址">＋</button><button class="group-sort" type="button" title="调整网址顺序" aria-label="调整网址顺序">↕</button></div><span class="count"></span></div><div class="cards"></div></section></template>
+  <template id="groupTemplate"><section class="nav-group"><div class="group-heading"><span class="group-icon"></span><h2></h2><span class="count"></span></div><div class="cards"></div></section></template>
   <p id="pageMessage" class="page-message" role="status" hidden></p>
   <button id="backToTop" class="back-to-top" aria-label="回到顶部" hidden>↑</button>
   <!-- APP -->

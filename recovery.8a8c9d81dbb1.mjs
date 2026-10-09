@@ -1,5 +1,5 @@
 // NavDesk JavaScript module v2
-import './dialogs.83efedf8180f.mjs';
+import './dialogs.06964d08c351.mjs';
 // Keep editor DOM and drafts intact while a session is renewed.
 
  let pending;

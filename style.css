@@ -262,53 +262,11 @@ html[data-theme="light"] { --bg: #faf7f8; --surface: rgba(255,255,255,.58); --su
 @media(max-width:650px) {
 .navigation-column { gap: 14px; }
 }
-.browser-clock { white-space: nowrap; flex: none; }
-.browser-clock .clock { font-size: 14px; letter-spacing: .01em; color: var(--text); font-variant-numeric: tabular-nums; }
-@media(max-width:650px) {
-.app-shell .browser-clock { font-size: 13px; }
-.browser-clock .clock { font-size: 12px; letter-spacing: 0; }
-}
-.browser-clock .clock { display: flex; flex-direction: column; gap: 3px; font-weight: 700; line-height: 1.3; }
-#clockDate { font-size: 13px; font-weight: 700; color: var(--muted); }
-#clockTime { font-size: 19px; font-weight: 750; letter-spacing: .02em; }
-@media(max-width:650px) {
-#clockDate { font-size: 11px; }
-}
-#clockLunar { font-size: 11px; font-weight: 650; color: var(--muted); }
-#clockLunar:empty { display: none; }
-@media(max-width:650px) {
-#clockLunar { font-size: 10px; }
-}
-#clockTime { white-space: pre; }
-button.browser-clock { border: 0; background: transparent; padding: 0; text-align: left; color: inherit; font: inherit; cursor: pointer; border-radius: 6px; }
-button.browser-clock:hover { opacity: .8; }
-button.browser-clock:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
-@media(max-width:650px) {
-.app-shell .browser-clock { min-width: 0; }
-.browser-clock .clock { flex-direction: row; align-items: center; gap: 6px; white-space: nowrap; }
-#clockDate,#clockLunar { font-size: 10px; }
-#clockTime { font-size: 12px; letter-spacing: 0; }
-}
-@media(max-width:360px) {
-.browser-clock .clock { gap: 4px; }
-#clockDate,#clockLunar { font-size: 9px; }
-#clockTime { font-size: 11px; }
-}
-@media(max-width:650px) {
-.app-shell .top-actions { display: none; }
-.app-shell .browser-clock { flex: 0 0 100%; width: 100%; max-width: 100%; }
-.app-shell .browser-clock .clock { width: 100%; justify-content: space-between; }
-}
 .category-create { display: flex; gap: 10px; }
 .category-create input { min-width: 0; flex: 1; padding: 10px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--text); }
 .category-create button { flex: none; }
 @media(max-width:650px) {
 .app-shell .topbar {padding:14px 0 18px;gap:12px;position:relative}
-.app-shell button.browser-clock {border-radius:0;min-height:36px;padding:2px 0 9px;border-bottom:1px solid var(--line)}
-.app-shell .browser-clock .clock {gap:7px;align-items:center;line-height:1.4}
-.app-shell #clockDate {font-size:11px;font-weight:650;color:var(--text);letter-spacing:-.2px}
-.app-shell #clockLunar {font-size:10px;font-weight:500;color:var(--muted);letter-spacing:-.3px}
-.app-shell #clockTime {font-size:13px;font-weight:750;letter-spacing:0;background:var(--accent-soft);color:var(--accent);padding:4px 7px;border-radius:6px;line-height:1.3}
 .app-shell .web-search {height:48px;border-radius:12px;border:1px solid var(--line);background:var(--surface);box-shadow:0 2px 8px rgba(30,50,90,.025)}
 .app-shell .web-search:focus-within {border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
 .app-shell .web-search select {width:86px;max-width:86px;padding-left:12px;padding-right:17px;font-size:12px;color:var(--muted);font-weight:550}
@@ -319,10 +277,6 @@ button.browser-clock:focus-visible { outline: 2px solid var(--accent); outline-o
 .app-shell .web-search button::after {content:"";position:absolute;width:7px;height:2px;border-radius:2px;background:currentColor;left:25px;top:27px;transform:rotate(45deg)}
 }
 @media(max-width:360px) {
-.app-shell .browser-clock .clock {gap:4px}
-.app-shell #clockDate {font-size:10px}
-.app-shell #clockLunar {font-size:9px}
-.app-shell #clockTime {font-size:12px;padding-inline:5px}
 .app-shell .web-search select {width:78px;max-width:78px;padding-left:10px}
 }
 .card-copy mark {color:var(--accent);background:var(--accent-soft);border-radius:2px}
@@ -344,3 +298,19 @@ html[data-theme=dark] .primary{color:var(--bg)}
 
 .family-frame{display:block;width:100%;height:calc(100dvh - 70px);min-height:420px;border:1px solid var(--line);border-radius:18px;background:var(--surface)}
 @media(max-width:1099px){.family-frame{height:calc(100dvh - 150px);min-height:500px}}
+
+/* Compact navigation: quiet category dividers and centralized settings. */
+.app-shell .group-heading { gap: 7px; min-height: 22px; margin: 0 0 7px; }
+.app-shell .group-heading .group-icon { display: none; }
+.app-shell .group-heading h2 { font-size: 13px; font-weight: 600; line-height: 22px; color: var(--muted); }
+.app-shell .group-heading .count { border: 0; padding: 0; margin: 0; font-size: 10px; line-height: 22px; }
+.app-shell .group-heading::after { content: ""; height: 1px; flex: 1; background: var(--line); }
+@media(min-width:651px) {
+ .app-shell .navigation { gap: 12px; }
+ .app-shell .navigation-column { gap: 12px; }
+ .app-shell .cards { grid-template-columns: repeat(auto-fill,minmax(168px,1fr)); gap: 8px; }
+ .app-shell .nav-card { min-height: 56px; padding: 8px 26px 8px 10px; gap: 8px; border-radius: 10px; }
+ .app-shell .site-icon { flex-basis: 28px; height: 28px; border-radius: 8px; }
+ .app-shell .card-copy { gap: 3px; }
+ .app-shell .card-copy small { font-size: 10px; }
+}

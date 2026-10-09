@@ -1,5 +1,5 @@
 // NavDesk JavaScript module v2
-import './dialogs.83efedf8180f.mjs';
+import './dialogs.06964d08c351.mjs';
 import * as model from './model.8ebbfa033d2f.mjs';
 export function parseBookmarks(text){
  const doc=new DOMParser().parseFromString(text,'text/html');
@@ -7,17 +7,18 @@ export function parseBookmarks(text){
  if(!items.length)throw Error('没有找到书签，请选择浏览器导出的书签HTML');return items;
 }
 
-export function createManager({navigation:nav,pins,icons}){
+export function createManager({navigation:nav,pins,icons,edit}){
 let dialog,body,message,busy=false,mode,controller,rows=[];
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const query=s=>dialog.querySelector(s);
 async function mutate(fn){for(let attempt=0;attempt<2;attempt++){const fresh=await nav.read();const result=await fn(fresh);try{await nav.save(fresh);return result}catch(error){if(error.status!==409||attempt)throw error}}}
 
-function ensure(){if(dialog)return;dialog=document.createElement('dialog');dialog.className='quick-editor manager-dialog';dialog.innerHTML=`<header><div><p>网站整理</p><h2 id="managerTitle">整理网址</h2></div><button type="button" data-close aria-label="关闭整理面板">×</button></header><nav class="manager-tabs"><button data-tab="categories">分类管理</button><button data-tab="batch">批量添加</button><button data-tab="import">书签导入</button><button data-tab="trash">回收站</button><button data-tab="check">失效检查</button><button data-tab="pins">置顶备份</button><button data-tab="backup">备份与退出</button></nav><div id="managerBody"></div><p id="managerMessage" role="status"></p>`;document.body.append(dialog);body=query('#managerBody');message=query('#managerMessage');query('[data-close]').onclick=()=>{if(!busy){controller?.abort();dialog.close()}};dialog.addEventListener('cancel',e=>{if(busy)e.preventDefault();else controller?.abort()});dialog.querySelectorAll('[data-tab]').forEach(button=>button.onclick=()=>{if(!busy)screen(button.dataset.tab)});matchMedia('(max-width:650px)').addEventListener('change',e=>{if(e.matches&&!busy){controller?.abort();dialog.close()}})}
+function ensure(){if(dialog)return;dialog=document.createElement('dialog');dialog.className='quick-editor manager-dialog';dialog.innerHTML=`<header><div><p>网站整理</p><h2 id="managerTitle">整理网址</h2></div><button type="button" data-close aria-label="关闭整理面板">×</button></header><nav class="manager-tabs">${typeof edit==='function'?'<button data-tab="settings">导航设置</button>':''}<button data-tab="categories">分类管理</button><button data-tab="batch">批量添加</button><button data-tab="import">书签导入</button><button data-tab="trash">回收站</button><button data-tab="check">失效检查</button><button data-tab="pins">置顶备份</button><button data-tab="backup">备份与退出</button></nav><div id="managerBody"></div><p id="managerMessage" role="status"></p>`;document.body.append(dialog);body=query('#managerBody');message=query('#managerMessage');query('[data-close]').onclick=()=>{if(!busy){controller?.abort();dialog.close()}};dialog.addEventListener('cancel',e=>{if(busy)e.preventDefault();else controller?.abort()});dialog.querySelectorAll('[data-tab]').forEach(button=>button.onclick=()=>{if(!busy)screen(button.dataset.tab)});matchMedia('(max-width:650px)').addEventListener('change',e=>{if(e.matches&&!busy){controller?.abort();dialog.close()}})}
 function status(text){message.textContent=text}
 function buttonBusy(value){busy=value;dialog.querySelectorAll('button,input,select,textarea').forEach(el=>el.disabled=value)}
 function options(){return nav.get().groups.map(g=>`<option value="${esc(g.id)}">${esc(g.name)}</option>`).join('')}
-function screen(action){controller?.abort();mode=action;rows=[];status('');dialog.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===action));query('#managerTitle').textContent=action==='categories'?'分类管理':'整理网址';
+function screen(action){controller?.abort();mode=action;rows=[];status('');dialog.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===action));query('#managerTitle').textContent=action==='settings'?'导航设置':action==='categories'?'分类管理':'整理网址';
+ if(action==='settings'){renderSettings();return}
  if(action==='batch'||action==='import'){
   body.innerHTML=`<p class="manager-hint">预览后选择要添加的项目。相同网址会自动跳过，不覆盖现有内容。</p><label>默认目标分类<select id="importTarget">${options()}</select></label>${action==='batch'?'<label>每行一个网址，或 名称｜网址<textarea id="batchText" rows="6" placeholder="GitHub｜https://github.com/\nhttps://example.com/"></textarea></label><button id="prepareImport" type="button">生成预览</button>':'<label>选择浏览器书签 HTML<input id="bookmarkFile" type="file" accept=".html,.htm,text/html"></label><label class="quick-check"><input id="preserveFolders" type="checkbox" checked>按书签文件夹合并分类</label>'}<div id="importPreview"></div><button class="primary" id="commitImport" hidden>添加选中网址</button>`;
   if(action==='batch')query('#prepareImport').onclick=()=>preview(model.parseLines(query('#batchText').value));
@@ -25,6 +26,15 @@ function screen(action){controller?.abort();mode=action;rows=[];status('');dialo
   query('#importTarget').onchange=()=>{if(rows.length)preview(rows)};
   query('#commitImport').onclick=commitImport;
  }else if(action==='categories')renderCategories();else if(action==='trash')renderTrash();else if(action==='pins')renderPinBackup();else if(action==='backup')renderBackup();else renderChecks();
+}
+function renderSettings(){
+ const groups=nav.get().groups;
+ body.innerHTML=`<p class="manager-hint">选择分类，新增网址或调整分类内的网址顺序。</p><label>目标分类<select id="settingsGroup">${options()}</select></label><div class="settings-actions"><button id="settingsAdd" class="primary" ${groups.length?'':'disabled'}>＋ 新增网址</button><button id="settingsSort" ${groups.length?'':'disabled'}>调整网址顺序</button><button id="settingsCategories">分类管理</button><button id="settingsPins">调整置顶顺序</button></div>`;
+ const openEditor=action=>{const groupId=query('#settingsGroup').value;if(!groupId)return;dialog.close();edit(action,groupId)};
+ query('#settingsAdd').onclick=()=>openEditor('openQuickEditor');
+ query('#settingsSort').onclick=()=>openEditor('openSort');
+ query('#settingsCategories').onclick=()=>screen('categories');
+ query('#settingsPins').onclick=()=>{dialog.close();edit('openSort','__pinned')};
 }
 function preview(candidates){
  if(candidates.length>1000){status('每批最多1000条，请拆分文件或文本');return}
@@ -60,7 +70,7 @@ function renderChecks(){
 async function open(action,payload={}){
  if(matchMedia('(max-width:650px)').matches)return;
  ensure();
- if(['batch','import','trash','check','pins','categories','backup'].includes(action)){dialog.showModal();screen(action);return}
+ if(['settings','batch','import','trash','check','pins','categories','backup'].includes(action)){dialog.showModal();screen(action);return}
  const current=nav.get(),origin=current.groups.find(g=>g.id===payload.groupId),oldLink=origin?.links.find(l=>l.id===payload.linkId);
  if(action==='move'){
   dialog.showModal();mode='move';query('#managerTitle').textContent='移动到其他分类';status('');

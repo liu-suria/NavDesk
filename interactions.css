@@ -67,3 +67,5 @@
 #quickLatest {white-space:pre-wrap;overflow-wrap:anywhere;font-family:inherit;font-size:12px;line-height:1.7;padding:10px;background:var(--accent-soft);border-radius:8px}
 .session-dialog {max-width:420px}
 .session-dialog p {font-size:13px;line-height:1.6}
+
+.settings-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
