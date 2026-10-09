@@ -15,6 +15,6 @@ export async function onRequestGet(context) {
 
 export async function onRequestPost(context){
  const auth=await requireAuth(context);if(auth.response)return auth.response;
- try{const input=await readJson(context.request),host=iconHost(input.url);const icon=await loadIcon(getNavigationStore(),host,fetch,Date.now(),true);return new Response(JSON.stringify({ok:!!icon.body&&!icon.refreshFailed}),{headers:{'Content-Type':'application/json','Cache-Control':'no-store'}})}
+ try{const input=await readJson(context.request),host=iconHost(input.url);const icon=await loadIcon(getNavigationStore(),host,fetch,Date.now(),true);return new Response(JSON.stringify({ok:!!icon.body&&!icon.refreshFailed,...(!icon.body?{error:icon.error}: {})}),{headers:{'Content-Type':'application/json','Cache-Control':'no-store'}})}
  catch{return new Response(JSON.stringify({error:'无法刷新图标'}),{status:400,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}})}
 }

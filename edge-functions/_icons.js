@@ -4,6 +4,27 @@ export function iconHost(value) {
   if (!/^[a-z0-9.-]+\.[a-z]{2,63}$/.test(host) || /\.(local|localhost|internal|lan|test|invalid)$/.test(host)) throw new Error('Unsupported host');
   return host;
 }
+// ICO bundles often contain multiple resolutions. Keep only the closest 32px
+// frame, reusing its compressed bytes rather than decoding large source images.
+export function compactIcon(bytes, type) {
+  if (!['image/x-icon','image/vnd.microsoft.icon'].includes(type) || bytes.length < 22) return {bytes,type};
+  const view=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);
+  if(view.getUint16(0,true)!==0 || view.getUint16(2,true)!==1) return {bytes,type};
+  const count=view.getUint16(4,true),frames=[];
+  if(count>64 || bytes.length<6+count*16)return {bytes,type};
+  for(let i=0;i<count;i++){
+    const at=6+i*16,width=bytes[at]||256,height=bytes[at+1]||256;
+    const size=view.getUint32(at+8,true),offset=view.getUint32(at+12,true);
+    if(size && offset>=6+count*16 && offset+size<=bytes.length)frames.push({at,size,offset,score:Math.abs(width-32)+Math.abs(height-32)});
+  }
+  frames.sort((a,b)=>a.score-b.score||a.size-b.size);
+  if(!frames.length)return {bytes,type};
+  const frame=frames[0],body=bytes.slice(frame.offset,frame.offset+frame.size);
+  if(body[0]===137 && body[1]===80 && body[2]===78 && body[3]===71)return {bytes:body,type:'image/png'};
+  const compact=new Uint8Array(22+body.length);compact.set([0,0,1,0,1,0]);compact.set(bytes.slice(frame.at,frame.at+16),6);
+  new DataView(compact.buffer).setUint32(18,22,true);compact.set(body,22);
+  return {bytes:compact,type:'image/x-icon'};
+}
 export async function loadIcon(store, host, fetcher = fetch, now = Date.now(), force = false) {
   const key = `icons/v2/${host}.json`;
   let cached;
@@ -11,7 +32,7 @@ export async function loadIcon(store, host, fetcher = fetch, now = Date.now(), f
   if (!force && cached?.expires > now) return cached;
   try {
     // Fixed upstream only: never fetch arbitrary user URLs or internal network addresses.
-    let response;
+    let response, failures=[];
     // Request small provider-rendered rasters; no arbitrary destination or redirects.
     for (const url of [
       `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://${encodeURIComponent(host)}&size=32`,
@@ -20,9 +41,9 @@ export async function loadIcon(store, host, fetcher = fetch, now = Date.now(), f
       try {
         const candidate = await fetcher(url, {redirect:'error', signal:AbortSignal.timeout(2500)});
         if (candidate.ok && /^image\//.test(candidate.headers.get('content-type') || '')) { response=candidate; break; }
-      } catch {}
+      } catch (error) {failures.push(error.name+': '+error.message)}
     }
-    if (!response) throw new Error('Providers unavailable');
+    if (!response) throw new Error('Providers unavailable: '+failures.join('; '));
     const type = (response.headers.get('content-type') || '').split(';')[0];
     if (!response.ok || !['image/png','image/jpeg','image/webp','image/x-icon','image/vnd.microsoft.icon'].includes(type)) throw new Error('Not an image');
     const reader = response.body.getReader();
@@ -31,15 +52,17 @@ export async function loadIcon(store, host, fetcher = fetch, now = Date.now(), f
     if (!size) throw new Error('Empty icon');
     const bytes = new Uint8Array(size); let offset = 0;
     for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length}
-    let binary = ''; for(const byte of bytes) binary += String.fromCharCode(byte);
-    cached = {type,body:btoa(binary),expires:now+30*DAY};
-  } catch {
+    let binary = '';
+    const compact=compactIcon(bytes,type);
+    binary='';for(const byte of compact.bytes)binary+=String.fromCharCode(byte);
+    cached = {type:compact.type,body:btoa(binary),expires:now+30*DAY};
+  } catch (error) {
     if (cached?.body) {
       const stale={...cached,expires:now+3600000};
       try {await store.setJSON(key,stale)} catch {}
       return force?{...stale,refreshFailed:true}:stale;
     }
-    cached = {body:null,expires:now+3600000};
+    cached = {body:null,expires:now+3600000,error:String(error.message).slice(0,300)};
   }
   try { await store.setJSON(key,cached); } catch { /* A cache write must not hide a valid icon. */ }
   return cached;

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {iconHost,loadIcon} from '../edge-functions/_icons.js';
+import {iconHost,loadIcon,compactIcon} from '../edge-functions/_icons.js';
 function store(){const data=new Map();return {data,get:async key=>data.get(key),setJSON:async(key,value)=>data.set(key,value)}}
 test('cache miss fetches once; subsequent reads use persistent cache',async()=>{const s=store();let calls=0;const f=async()=>{calls++;return new Response(new Uint8Array([1,2,3]),{headers:{'Content-Type':'image/png'}})};const first=await loadIcon(s,'example.com',f,100);assert.equal(first.body,'AQID');assert.deepEqual(await loadIcon(s,'example.com',f,200),first);assert.equal(calls,1)});
 test('failed icons have a negative cache and never block navigation',async()=>{const s=store();let calls=0;const f=async()=>{calls++;throw Error('timeout')};assert.equal((await loadIcon(s,'example.com',f,100)).body,null);await loadIcon(s,'example.com',f,200);assert.equal(calls,2)});
@@ -23,4 +23,13 @@ test('fallback is a fixed provider and redirects cannot reach arbitrary targets'
 test('stale failure gets retry backoff instead of repeatedly hitting providers',async()=>{
  const s=store();s.data.set('icons/v2/example.com.json',{body:'AQID',type:'image/png',expires:1});let calls=0;
  const fail=async()=>{calls++;throw Error('down')};await loadIcon(s,'example.com',fail,100);await loadIcon(s,'example.com',fail,200);assert.equal(calls,2);
+});
+
+test('ICO compaction selects one 32px frame and preserves PNG bytes',()=>{
+ const bytes=new Uint8Array(60),view=new DataView(bytes.buffer);
+ view.setUint16(2,1,true);view.setUint16(4,2,true);
+ bytes[6]=64;bytes[7]=64;view.setUint32(14,14,true);view.setUint32(18,38,true);
+ bytes[22]=32;bytes[23]=32;view.setUint32(30,8,true);view.setUint32(34,52,true);
+ bytes.set([137,80,78,71,13,10,26,10],52);
+ const result=compactIcon(bytes,'image/x-icon');assert.equal(result.type,'image/png');assert.equal(result.bytes.length,8);assert.deepEqual([...result.bytes],[137,80,78,71,13,10,26,10]);
 });
