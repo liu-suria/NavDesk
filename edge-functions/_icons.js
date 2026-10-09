@@ -26,7 +26,7 @@ export function compactIcon(bytes, type) {
   return {bytes:compact,type:'image/x-icon'};
 }
 export async function loadIcon(store, host, fetcher = fetch, now = Date.now(), force = false) {
-  const key = `icons/v3/${host}.json`;
+  const key = `icons/v4/${host}.json`;
   let cached;
   try { cached = await store.get(key, {type:'json'}); } catch {}
   if (!force && cached?.expires > now) return cached;
@@ -35,6 +35,7 @@ export async function loadIcon(store, host, fetcher = fetch, now = Date.now(), f
     let response, failures=[];
     // Request small provider-rendered rasters; no arbitrary destination or redirects.
     for (const url of [
+      `https://favicon.yandex.net/favicon/${encodeURIComponent(host)}`,
       `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://${encodeURIComponent(host)}&size=32`,
       `https://icons.duckduckgo.com/ip3/${encodeURIComponent(host)}.ico`,
     ]) {
