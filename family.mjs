@@ -31,9 +31,10 @@ export function mountFamily(root,request,initial){
   let lastGroup='';
   root.querySelector('.family-list').innerHTML=items.map(e=>{
    const days=Math.round((Date.parse(e.date)-Date.parse(today()))/864e5),group=e.status==='done'?'已完成':days<0?'逾期':days===0?'今天':days===1?'明天':days<=7?'未来 7 天':days<=30?'30 天内':days<=365?'一年内':'更远';
-   const heading=group!==lastGroup?`<h3 class="family-date-group">${group}</h3>`:'';lastGroup=group;
+   const state=e.status==='done'?'is-done':days<0?'is-overdue':days===1?'is-tomorrow':'';
+   const heading=group!==lastGroup?`<h3 class="family-date-group ${state}">${group}</h3>`:'';lastGroup=group;
    const type=ledger.settings?.types?.find(t=>t.id===e.type)?.name||'事项';
-   return heading+`<article class="family-event ${e.status==='done'?'is-done':e.date<today()?'is-overdue':''}"><button type="button" class="family-event-content" data-action="detail" data-id="${esc(e.id)}"><strong>${esc(e.title)}</strong><span>${esc(type)}${Number(e.amount)?' · '+esc(e.currency||'CNY')+' '+esc(e.amount):''}</span><time datetime="${esc(e.date)}">${esc(e.date)}</time></button><button type="button" class="family-done" data-action="${e.status==='done'?'restore':'done'}" data-id="${esc(e.id)}" aria-label="${e.status==='done'?'恢复':'完成'}${esc(e.title)}">${e.status==='done'?'↶':'✓'}</button></article>`;
+   return heading+`<article class="family-event ${state}"><button type="button" class="family-event-content" data-action="detail" data-id="${esc(e.id)}"><strong>${esc(e.title)}</strong><span>${esc(type)}${Number(e.amount)?' · '+esc(e.currency||'CNY')+' '+esc(e.amount):''}</span><time datetime="${esc(e.date)}">${esc(e.date)}</time></button><button type="button" class="family-done" data-action="${e.status==='done'?'restore':'done'}" data-id="${esc(e.id)}" aria-label="${e.status==='done'?'恢复':'完成'}${esc(e.title)}">${e.status==='done'?'↶':'✓'}</button></article>`;
   }).join('')||'<div class="family-empty"><span>☀</span><strong>这里暂时没有事项</strong><p>放轻松，也可以添加一条新的提醒。</p></div>';
   if(count>50)root.querySelector('.family-list').insertAdjacentHTML('beforeend','<p class="family-muted">显示前 50 条，更多事项请打开完整管理。</p>');
  }
