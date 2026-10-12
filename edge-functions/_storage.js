@@ -5,9 +5,6 @@ const DATA_KEY = "navigation/data.json";
 
 export function getNavigationStore() { return getStore(STORE_NAME); }
 
-export async function getNavigation(store) {
-  const data = await store.get(DATA_KEY, { type: "json", consistency: "strong" });
-  return data && typeof data === "object" ? { ...data, settings: { brandName: data.settings?.brandName || "NavDesk" } } : { version: 1, updatedAt: null, settings: { brandName: "NavDesk" }, groups: [] };
-}
+export {readNavigation as getNavigation} from './_navigation-read.js';
 
 export async function saveNavigation(store, data) { await store.setJSON(DATA_KEY, data); }

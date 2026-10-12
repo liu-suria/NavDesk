@@ -69,3 +69,7 @@
 .session-dialog p {font-size:13px;line-height:1.6}
 
 .settings-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+
+.category-create { display: flex; gap: 10px; }
+.category-create input { min-width: 0; flex: 1; padding: 10px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--text); }
+.category-create button { flex: none; }

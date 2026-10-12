@@ -2,20 +2,13 @@ const $ = (selector, root = document) => root.querySelector(selector);
 const app = $("#app"), loginScreen = $("#loginScreen"), navigation = $("#navigation"), categoryRail = $("#categoryRail");
 const bootScreen = $("#bootScreen");
 const { read, write, request } = window.navdeskBoot;
-const clockDateFormat = new Intl.DateTimeFormat("zh-CN", { year: "numeric", month: "long", day: "numeric" });
-const clockTimeFormat = new Intl.DateTimeFormat("zh-CN", { weekday: "short", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+const clockDateFormat = new Intl.DateTimeFormat("zh-CN", { timeZone:"Asia/Shanghai",year: "numeric", month: "long", day: "numeric" });
+const clockTimeFormat = new Intl.DateTimeFormat("zh-CN", { timeZone:"Asia/Shanghai",weekday: "short", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
 
 function escapeHtml(value) { return String(value ?? "").replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char])); }
 function hostname(url) { try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return ""; } }
-let lunarDateKey='',lunarFormatter;
-try{const candidate=new Intl.DateTimeFormat('zh-CN-u-ca-chinese',{month:'long',day:'numeric'});if(candidate.resolvedOptions().calendar==='chinese')lunarFormatter=candidate}catch{}
-function formatLunar(now){
-  if(!lunarFormatter)return '';
-  const parts=lunarFormatter.formatToParts(now),month=parts.find(p=>p.type==='month')?.value,day=Number(parts.find(p=>p.type==='day')?.value);
-  if(!month||!day)return '';
-  const digits='一二三四五六七八九十',dayName=day<=10?'初'+digits[day-1]:day<20?'十'+digits[day-11]:day===20?'二十':day<30?'廿'+digits[day-21]:'三十';
-  return '农历:'+month+dayName;
-}
+let lunarDateKey='';
+function formatLunar(now){return '农历:'+lunarLabel(now)}
 function formatClock() {
   const now=new Date(),parts=clockTimeFormat.formatToParts(now);
   const part=type=>parts.find(item=>item.type===type)?.value||'';

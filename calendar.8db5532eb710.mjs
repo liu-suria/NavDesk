@@ -1,4 +1,5 @@
 // NavDesk JavaScript module v2
+import {getLunar,lunarLabel} from './lunar.9b3eca5247e8.mjs';
 // 2026 State Council schedule, verified 2026-09-23.
 export const source='https://www.huoqiu.gov.cn/public/6601401/38667291.html';
 export const holidays=[['元旦','01-01','01-03',['01-04']],['春节','02-15','02-23',['02-14','02-28']],['清明节','04-04','04-06',[]],['劳动节','05-01','05-05',['05-09']],['端午节','06-19','06-21',[]],['中秋节','09-25','09-27',[]],['国庆节','10-01','10-07',['09-20','10-10']]];
@@ -11,17 +12,15 @@ export function dayStatus(date){
  for(const [name,start,end,work] of holidays){if(work.includes(key))return {kind:'work',text:`${name}调休 · 补班`};if(key>=start&&key<=end)return {kind:'rest',text:`${name}假期 · 放假`}}
  return {kind:'normal',text:[0,6].includes(date.getDay())?'周末（无调休安排）':'工作日'};
 }
-let lunar;
-try{const f=new Intl.DateTimeFormat('zh-CN-u-ca-chinese',{month:'long',day:'numeric'});if(f.resolvedOptions().calendar==='chinese')lunar=f}catch{}
-function lunarText(date){if(!lunar)return '农历不可用';const parts=lunar.formatToParts(date),day=Number(parts.find(p=>p.type==='day')?.value),month=parts.find(p=>p.type==='month')?.value||'';const digits='一二三四五六七八九十';return month+(day<=10?'初'+digits[day-1]:day<20?'十'+digits[day-11]:day===20?'二十':day<30?'廿'+digits[day-21]:'三十')}
+const lunarText=date=>lunarLabel(date);
 const termsByYear=new Map([[2026,JSON.parse('{"2026-01-05":"小寒","2026-01-20":"大寒","2026-02-04":"立春","2026-02-18":"雨水","2026-03-05":"惊蛰","2026-03-20":"春分","2026-04-05":"清明","2026-04-20":"谷雨","2026-05-05":"立夏","2026-05-21":"小满","2026-06-05":"芒种","2026-06-21":"夏至","2026-07-07":"小暑","2026-07-23":"大暑","2026-08-07":"立秋","2026-08-23":"处暑","2026-09-07":"白露","2026-09-23":"秋分","2026-10-08":"寒露","2026-10-23":"霜降","2026-11-07":"立冬","2026-11-22":"小雪","2026-12-07":"大雪","2026-12-22":"冬至"}')]]),attemptedYears=new Set(),termErrors=new Set();
 const solarFestivals={'01-01':'元旦','02-14':'情人节','03-08':'妇女节','03-12':'植树节','04-01':'愚人节','05-01':'劳动节','05-04':'青年节','06-01':'儿童节','07-01':'建党节','08-01':'建军节','09-10':'教师节','10-01':'国庆节','12-24':'平安夜','12-25':'圣诞节'};
 const lunarFestivals={'正月-1':'春节','正月-15':'元宵节','二月-2':'龙抬头','五月-5':'端午节','七月-7':'七夕','七月-15':'中元节','八月-15':'中秋节','九月-9':'重阳节','腊月-8':'腊八节'};
 export function festivals(date){
  const result=[],fixed=solarFestivals[dateKey(date).slice(5)];if(fixed)result.push(fixed);
- if(lunar){const parts=lunar.formatToParts(date),month=parts.find(p=>p.type==='month')?.value,day=Number(parts.find(p=>p.type==='day')?.value);const name=lunarFestivals[`${month}-${day}`];if(name)result.push(name);
-  const next=new Date(date.getFullYear(),date.getMonth(),date.getDate()+1,12),p=lunar.formatToParts(next);if(p.find(v=>v.type==='month')?.value==='正月'&&Number(p.find(v=>v.type==='day')?.value)===1)result.push('除夕');
- }
+ const value=getLunar(date);
+ if(value&&!value.leap){const name=lunarFestivals[`${value.monthName}-${value.day}`];if(name)result.push(name)}
+ const next=getLunar(new Date(date.getFullYear(),date.getMonth(),date.getDate()+1,12));if(next&&!next.leap&&next.month===1&&next.day===1)result.push('除夕');
  if(date.getDay()===0&&date.getMonth()===4&&date.getDate()>=8&&date.getDate()<=14)result.push('母亲节');
  if(date.getDay()===0&&date.getMonth()===5&&date.getDate()>=15&&date.getDate()<=21)result.push('父亲节');
  return result;
@@ -56,7 +55,7 @@ function render(){
  for(let i=0;i<offset;i++){const blank=document.createElement('span');blank.setAttribute('aria-hidden','true');grid.append(blank)}
  for(let day=1;day<=days;day++){
   const date=new Date(year,month,day,12),key=dateKey(date),state=dayStatus(date),button=document.createElement('button');button.type='button';button.className='calendar-day';button.dataset.kind=state.kind;button.dataset.date=key;button.classList.toggle('today',key===today);button.classList.toggle('weekend',[0,6].includes(date.getDay()));button.setAttribute('aria-pressed',String(key===dateKey(selected)));button.setAttribute('aria-label',`${key} 农历${lunarText(date)} ${state.text}`);
-  const number=document.createElement('strong');number.textContent=day;const label=document.createElement('small'),extra=events(date);label.textContent=extra.term||extra.names[0]||(matchMedia('(max-width:650px)').matches?lunarText(date).replace(/^.*月(?=.+)/,''):lunarText(date));label.className=extra.term?'calendar-term':extra.names.length?'calendar-festival':'';button.title=[lunarText(date),...extra.names,extra.term,state.text].filter(Boolean).join(' · ');button.setAttribute('aria-label',key+' '+button.title);button.append(number,label);
+  const number=document.createElement('strong');number.textContent=day;const label=document.createElement('small'),extra=events(date);label.textContent=extra.term||extra.names[0]||(matchMedia('(max-width:650px)').matches?lunarLabel(date,true):lunarText(date));label.className=extra.term?'calendar-term':extra.names.length?'calendar-festival':'';button.title=[lunarText(date),...extra.names,extra.term,state.text].filter(Boolean).join(' · ');button.setAttribute('aria-label',key+' '+button.title);button.append(number,label);
   if(['work','rest'].includes(state.kind)){const badge=document.createElement('b');badge.className='calendar-badge';badge.textContent=state.kind==='work'?'班':'休';button.append(badge)}
   button.onclick=()=>{selected=date;grid.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));detail()};grid.append(button);
  }

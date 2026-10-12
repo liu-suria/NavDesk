@@ -30,7 +30,7 @@ const server = http.createServer(async (req,res) => {
         if(url.pathname==='/api/family/login'){if(JSON.parse(raw).password!=='demo')return respond(401,{error:'家庭事务密码不正确'});return respond(200,{ok:true},{'Set-Cookie':'family_demo=1; Path=/; HttpOnly; SameSite=Strict'})}
         if(url.pathname==='/api/family/logout')return respond(200,{ok:true},{'Set-Cookie':'family_demo=; Path=/; Max-Age=0'});
         if(!req.headers.cookie?.includes('family_demo=1'))return respond(401,{error:'请连接家庭事务',code:'FAMILY_LOGIN_REQUIRED'});
-        if(url.pathname==='/api/family/ledger')return respond(200,family);
+        if(url.pathname==='/api/family/ledger'){const id=url.searchParams.get('id');return respond(200,id?{event:family.events.find(e=>e.id===id),revision:family.revision}:family)}
         if(url.pathname==='/api/family/events'){
           const input=JSON.parse(raw);if(input.revision!==family.revision)return respond(409,{error:'数据已更新'});
           if(req.method==='POST')family.events.push({...input,id:'demo-'+Date.now(),status:'pending'});
@@ -65,9 +65,10 @@ const server = http.createServer(async (req,res) => {
       return respond(200,navigation);
     }
     const path=url.pathname==='/'?'index.html':url.pathname==='/admin/'?'admin/index.html':url.pathname.slice(1);
-    if(!['index.html','admin/index.html','favicon.svg','site.webmanifest'].includes(path)&&!/^family\.[a-f0-9]{12}\.css$/.test(path)&&!/^(manage|model|calendar|navschema|dialogs|recovery|editor|family|search|pinyin)\.[a-f0-9]{12}\.mjs$/.test(path))return respond(404,{});
+    if(!['index.html','admin/index.html','favicon.svg','site.webmanifest'].includes(path)&&!/^family\.[a-f0-9]{12}\.css$/.test(path)&&!/^(manage|model|calendar|navschema|dialogs|recovery|editor|family|search|pinyin|lunar)\.[a-f0-9]{12}\.mjs$/.test(path))return respond(404,{});
     const body=await readFile(`${root}/${path}`);
     res.writeHead(200,{'Content-Type':path.endsWith('.mjs')?'text/javascript; charset=utf-8':path.endsWith('.html')?'text/html; charset=utf-8':path.endsWith('.svg')?'image/svg+xml':path.endsWith('.css')?'text/css; charset=utf-8':'application/manifest+json'});res.end(body);
   }catch{respond(500,{error:'Local preview error'})}
 });
-server.listen(8766,'127.0.0.1',()=>console.log('Local mock preview: http://127.0.0.1:8766/ — demo password: demo; no production data'));
+const port=Number(process.env.NAVDESK_PREVIEW_PORT)||8766;
+server.listen(port,'127.0.0.1',()=>console.log(`Local mock preview: http://127.0.0.1:${port}/ — demo password: demo; no production data`));

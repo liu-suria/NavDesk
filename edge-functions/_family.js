@@ -39,9 +39,10 @@ export async function proxyFamily(context,resource,fetcher=fetch){
  try{
  const headers={'Accept':'application/json'};
  if(apiKey)headers['X-API-Key']=String(apiKey);else headers.Cookie=`${upstreamCookie}=${token}`;
- const requestURL=new URL(context.request.url),target=new URL('/api/'+resource,ORIGIN);
+ const requestURL=new URL(context.request.url),target=new URL('/api/'+(resource==='ledger'?'dashboard':resource),ORIGIN);
  // Forward query values only to this fixed, authenticated application.
  for(const name of ['id','days','type','status','keyword'])if(requestURL.searchParams.has(name))target.searchParams.set(name,requestURL.searchParams.get(name));
+ if(resource==='events'&&context.request.method!=='GET')target.searchParams.set('view','dashboard');
  const init={...options,method:context.request.method,headers};
  if(!['GET','HEAD'].includes(init.method)){init.body=JSON.stringify(await readJson(context.request));headers['Content-Type']='application/json'}
  const response=await fetcher(target.href,init);

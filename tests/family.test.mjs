@@ -21,7 +21,7 @@ test('proxy fails closed before upstream calls for missing nav/family auth and c
 test('proxy only reaches fixed upstream, forwards auth server-side, and preserves revision conflict',async()=>{
  const c=await context('/events?target=http://127.0.0.1','PATCH',{}, {id:'event',revision:5,action:'done'});c.env={...env,HOMELEDGER_API_KEY:'test-api-key'};
  const response=await proxyFamily(c,'events',async(url,options)=>{
-  assert.equal(url,'https://home-ledger.667989.xyz/api/events');assert.equal(options.redirect,'error');assert.equal(options.headers['X-API-Key'],'test-api-key');
+  assert.equal(url,'https://home-ledger.667989.xyz/api/events?view=dashboard');assert.equal(options.redirect,'error');assert.equal(options.headers['X-API-Key'],'test-api-key');
   assert.deepEqual(JSON.parse(options.body),{id:'event',revision:5,action:'done'});return new Response(JSON.stringify({error:'conflict'}),{status:409,headers:{'Content-Type':'application/json'}});
  });assert.equal(response.status,409);assert.equal(response.headers.get('Cache-Control'),'no-store');assert.ok(!(await response.text()).includes('test-api-key'));
 });
@@ -32,9 +32,8 @@ test('login wraps upstream HttpOnly cookie and never returns password or plain u
  });assert.equal(response.status,200);const cookie=response.headers.get('set-cookie');assert.match(cookie,/HttpOnly; Secure; SameSite=Strict/);assert.ok(!cookie.includes(plain));assert.equal(await openSession(cookie.split('=')[1].split(';')[0],env.SESSION_SECRET),plain);
  assert.deepEqual(await response.json(),{ok:true});
 });
-test('embedded family reuses the fixed origin and validates message source',()=>{
+test('native family loads the authenticated API and contains no iframe',()=>{
  const source=readFileSync(new URL('../family.mjs',import.meta.url),'utf8');
- assert.ok(source.includes("https://home-ledger.667989.xyz"));
- assert.ok(source.includes("event.origin===origin&&event.source===frame?.contentWindow"));
- assert.ok(source.includes("/?embed=nav"));
+ assert.ok(source.includes('/api/family/ledger'));
+ assert.ok(!source.includes('iframe'));
 });

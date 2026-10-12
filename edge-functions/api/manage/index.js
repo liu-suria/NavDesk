@@ -1,3 +1,4 @@
+import {revisionCookie} from '../../_navigation-read.js';
 import { json, readJson, requireAuth } from '../../_lib.js';
 import { getNavigation, getNavigationStore, saveNavigation } from '../../_storage.js';
 import { applyOperation } from '../../_manage.js';
@@ -18,6 +19,6 @@ export async function onRequestPost(context) {
     const latest = await getNavigation(store);
     if (latest.updatedAt !== current.updatedAt) return json({error:'数据已更新，请重试'},409);
     await saveNavigation(store,next);
-    return json(next);
+    return json(next,200,{'Set-Cookie':revisionCookie(next.updatedAt)});
   } catch (error) { return json({error:error.message || '操作失败'},error.status || 400); }
 }
