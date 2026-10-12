@@ -4,12 +4,11 @@ import {createHash} from 'node:crypto';
 import {gzipSync} from 'node:zlib';
 process.chdir(fileURLToPath(new URL('..', import.meta.url)));
 const read = name => readFileSync(name, 'utf8');
-const inlineJS = text => text.replace(/^\s*\/\/[^\n]*\n/gm,'').replace(/<\/script/gi, '<\\/script');
+const inlineJS = text => text.replace(/^\s*\/\/[^\n]*\n/gm,'').replace(/^[ \t]+/gm,'').replace(/<\/script/gi, '<\\/script');
 const css = text => text.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ').replace(/\s*([{};,])\s*/g, '$1').replace(/:\s+/g, ':').trim();
 const asset=(name,text)=>{text='// NavDesk JavaScript module v2\n'+text;const path=`${name}.${createHash('sha256').update(text).digest('hex').slice(0,12)}.mjs`;writeFileSync(path,text);return path};
-const familyCSS=css(read('family.css'));
-const familyCSSURL=`family.${createHash('sha256').update(familyCSS).digest('hex').slice(0,12)}.css`;writeFileSync(familyCSSURL,familyCSS);
-const familyURL=asset('family',read('family.mjs').replace('__FAMILY_CSS_URL__',familyCSSURL));
+const familyDialogsURL=asset('familydialogs',`const style=document.createElement('style');style.textContent=${JSON.stringify(css(read('family-dialogs.css')))};document.head.append(style);`+read('family-dialogs.mjs'));
+const familyURL=asset('family',`const style=document.createElement('style');style.dataset.familyCss='1';style.textContent=${JSON.stringify(css(read('family.css')))};document.head.append(style);`+read('family.mjs').replace('__FAMILY_DIALOGS_URL__',familyDialogsURL));
 const pinyinURL=asset('pinyin',read('vendor/pinyin-dict.mjs'));
 const searchURL=asset('search',read('search.mjs').replace('./vendor/pinyin-dict.mjs','./'+pinyinURL));
 const uiURL=asset('dialogs',`const style=document.createElement('style');style.textContent=${JSON.stringify(css(read('interactions.css')))};document.head.append(style);`);
@@ -29,19 +28,18 @@ for (const [name, output, script, styles] of [
   const html = read(`templates/${name}.html`)
     .replace('<!-- BOOT -->', () => `<script>${inlineJS(read('boot.js').replace('__RECOVERY_URL__',recoveryURL).replaceAll('__WARM_URL__',warmURL))}</script>`)
     .replace('<!-- STYLE -->', () => `<style>${css(styles.map(read).join('\n'))}</style>`)
-    .replace('<!-- APP -->', () => `<script>${inlineJS((name==='home'?read('family-loader.js').replace('__FAMILY_URL__',familyURL)+'\n':'')+read('icons.js')+'\n'+read('services.js')+'\n'+read('manager-loader.js').replace('__MANAGE_URL__',manageURL)+'\n'+(name==='home'?read('lunar.mjs').replaceAll('export ','')+'\n':'')+read(script).replaceAll('__WARM_URL__',warmURL).replace('__SEARCH_URL__',searchURL).replace('__CALENDAR_URL__',calendarURL).replaceAll('__MODEL_URL__',modelURL).replace('__EDITOR_URL__',editorURL))}</script>`);
+    .replace('<!-- APP -->', () => `<script>${inlineJS((name==='home'?read('family-loader.js').replaceAll('__FAMILY_URL__',familyURL)+'\n':'')+read('icons.js')+'\n'+read('services.js')+'\n'+read('manager-loader.js').replace('__MANAGE_URL__',manageURL)+'\n'+(name==='home'?read('lunar.mjs').replaceAll('export ','')+'\n':'')+read(script).replaceAll('__WARM_URL__',warmURL).replace('__SEARCH_URL__',searchURL).replace('__CALENDAR_URL__',calendarURL).replaceAll('__MODEL_URL__',modelURL).replace('__EDITOR_URL__',editorURL))}</script>`);
   writeFileSync(output, html);
   console.log(`${output}: ${Buffer.byteLength(html)} B; gzip ${gzipSync(html).length} B; no external JS/CSS`);
 }
 
 // Only remove obsolete generated assets after every output has been written.
-const currentAssets=new Set([calendarURL,modelURL,manageURL,schemaURL,uiURL,recoveryURL,editorURL,familyURL,searchURL,pinyinURL,lunarURL,warmURL]);
+const currentAssets=new Set([calendarURL,modelURL,manageURL,schemaURL,uiURL,recoveryURL,editorURL,familyURL,familyDialogsURL,searchURL,pinyinURL,lunarURL,warmURL]);
 // Content-addressed public code can be reused indefinitely; private API data is never cached here.
 const deployment=JSON.parse(read('edgeone.json'));
-deployment.headers=deployment.headers.filter(rule=>!/^family\.[a-f0-9]{12}\.css$/.test(rule.source.replace(/^\//,''))&&!/^\/(calendar|model|manage|navschema|dialogs|recovery|editor|family|search|pinyin|lunar|warmstart)\.[a-f0-9]{12}\.mjs$/.test(rule.source));
+deployment.headers=deployment.headers.filter(rule=>!/^family\.[a-f0-9]{12}\.css$/.test(rule.source.replace(/^\//,''))&&!/^\/(calendar|model|manage|navschema|dialogs|recovery|editor|family|familydialogs|search|pinyin|lunar|warmstart)\.[a-f0-9]{12}\.mjs$/.test(rule.source));
 for(const path of currentAssets)deployment.headers.unshift({source:'/'+path,headers:[{key:'Cache-Control',value:'public, max-age=31536000, immutable'},{key:'Content-Type',value:'text/javascript; charset=utf-8'}]});
-deployment.headers.unshift({source:'/'+familyCSSURL,headers:[{key:'Cache-Control',value:'public, max-age=31536000, immutable'},{key:'Content-Type',value:'text/css; charset=utf-8'}]});
 writeFileSync('edgeone.json',JSON.stringify(deployment,null,2)+'\n');
-for(const file of readdirSync('.'))if(/^(calendar|model|manage|navschema|dialogs|recovery|editor|family|search|pinyin|lunar|warmstart)\.[a-f0-9]{12}\.mjs$/.test(file)&&!currentAssets.has(file))unlinkSync(file);
+for(const file of readdirSync('.'))if(/^(calendar|model|manage|navschema|dialogs|recovery|editor|family|familydialogs|search|pinyin|lunar|warmstart)\.[a-f0-9]{12}\.mjs$/.test(file)&&!currentAssets.has(file))unlinkSync(file);
 
-for(const file of readdirSync('.'))if(/^family\.[a-f0-9]{12}\.css$/.test(file)&&file!==familyCSSURL)unlinkSync(file);
+for(const file of readdirSync('.'))if(/^family\.[a-f0-9]{12}\.css$/.test(file))unlinkSync(file);

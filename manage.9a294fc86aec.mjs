@@ -1,5 +1,5 @@
 // NavDesk JavaScript module v2
-import './dialogs.7219e4a8ba63.mjs';
+import './dialogs.c7c3a0e5ad64.mjs';
 import * as model from './model.8ebbfa033d2f.mjs';
 export function parseBookmarks(text){
  const doc=new DOMParser().parseFromString(text,'text/html');

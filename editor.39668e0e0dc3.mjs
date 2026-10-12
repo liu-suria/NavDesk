@@ -1,5 +1,5 @@
 // NavDesk JavaScript module v2
-import './dialogs.7219e4a8ba63.mjs';
+import './dialogs.c7c3a0e5ad64.mjs';
 // Desktop editing is fetched only after an explicit action.
 export function install({navigation:nav,pins,icons,notify:pageMessage,openManager}){
  const $=selector=>document.querySelector(selector);

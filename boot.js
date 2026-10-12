@@ -23,6 +23,8 @@ window.navdeskBoot = (() => {
   }
   // Handle rejection immediately, including failures before the page script runs.
   const navigation = request(location.pathname.startsWith('/admin')?'/api/navigation':'/api/navigation?view=list',{},false,false).then(data => ({ data }), error => ({ error }));
+  // Desktop Hub data starts in parallel; mobile keeps it on demand.
+  const family=!location.pathname.startsWith('/admin')&&matchMedia('(min-width:1100px)').matches?request('/api/family/ledger',{},false,false).then(data=>({data}),error=>({error})):null;
   const cached=!location.pathname.startsWith('/admin')&&read('navdesk-cache-ready')?import('/__WARM_URL__').then(m=>m.fastStart(navigation,request)).catch(()=>navigation):navigation;
-  return { read, write, request, navigation:Promise.race([navigation,cached]) };
+  return { read, write, request, family, navigation:Promise.race([navigation,cached]) };
 })();

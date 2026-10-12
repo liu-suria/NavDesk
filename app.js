@@ -8,7 +8,6 @@ const clockTimeFormat = new Intl.DateTimeFormat("zh-CN", { timeZone:"Asia/Shangh
 function escapeHtml(value) { return String(value ?? "").replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char])); }
 function hostname(url) { try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return ""; } }
 let lunarDateKey='';
-function formatLunar(now){return '农历:'+lunarLabel(now)}
 function formatClock() {
   const now=new Date(),parts=clockTimeFormat.formatToParts(now);
   const part=type=>parts.find(item=>item.type===type)?.value||'';
@@ -16,7 +15,7 @@ function formatClock() {
   $('#clockDate').textContent=clockDateFormat.format(now);
   $('#clockTime').textContent=part('hour')+':'+part('minute')+':'+part('second');
   $('#clock').dateTime=$('#clockTime').dateTime=now.toISOString();
-  const key=clockDateFormat.format(now);if(key!==lunarDateKey){$('#clockLunar').textContent=formatLunar(now)+'['+weekday+']';lunarDateKey=key}
+  const key=clockDateFormat.format(now);if(key!==lunarDateKey){$('#clockLunar').textContent='农历:'+lunarLabel(now)+'['+weekday+']';lunarDateKey=key}
 }
 function setTheme(theme) { document.documentElement.dataset.theme = theme; write("navdesk-theme", theme); }
 
@@ -41,11 +40,12 @@ function createTile(group,link){
       const a = document.createElement("a"); a.className = "nav-card"; a.href = link.url; a.target = link.openInNew ? "_blank" : "_self"; a.rel = "noreferrer";
       const icon = window.navdeskIcons.source(link);
       a.innerHTML = `<span class="site-icon" data-icon="${escapeHtml(icon)}"><span class="icon-fallback">${escapeHtml([...link.name][0]?.toUpperCase() || "↗")}</span></span><span class="card-copy"><strong>${escapeHtml(link.name)}</strong><small>${escapeHtml(link.description || hostname(link.url))}</small></span>`;
-      a.addEventListener('contextmenu',event=>{if(isMobileNavigation())return;event.preventDefault();runEditor('openLinkMenu',group.id,link.id,event.clientX,event.clientY,a)});
-      const tile=document.createElement('div');tile.className='nav-tile';tile.dataset.name=link.name;tile.dataset.search=[link.name,link.url,link.description||'',group.name].join(' ').toLowerCase();tile.append(a);
-      const edit=document.createElement('button');edit.className='card-edit';edit.type='button';edit.textContent='⋯';edit.setAttribute('aria-label',`${link.name}的操作菜单`);edit.setAttribute("aria-haspopup","menu");edit.onclick=()=>{const box=edit.getBoundingClientRect();runEditor('openLinkMenu',group.id,link.id,box.left,box.bottom,edit)};tile.append(edit);
+      const tile=document.createElement('div');tile.className='nav-tile';tile.dataset.name=link.name;tile.dataset.groupId=group.id;tile.dataset.linkId=link.id;tile.dataset.search=[link.name,link.url,link.description||'',group.name].join(' ').toLowerCase();tile.append(a);
+      const edit=document.createElement('button');edit.className='card-edit';edit.type='button';edit.textContent='⋯';edit.setAttribute('aria-label',`${link.name}的操作菜单`);edit.setAttribute("aria-haspopup","menu");tile.append(edit);
 return tile;
 }
+app.addEventListener('contextmenu',event=>{const tile=event.target.closest('.nav-tile');if(!tile||isMobileNavigation())return;event.preventDefault();runEditor('openLinkMenu',tile.dataset.groupId,tile.dataset.linkId,event.clientX,event.clientY,tile.querySelector('a'))});
+app.addEventListener('click',event=>{const button=event.target.closest('.card-edit');if(!button)return;const tile=button.closest('.nav-tile'),box=button.getBoundingClientRect();runEditor('openLinkMenu',tile.dataset.groupId,tile.dataset.linkId,box.left,box.bottom,button)});
 let navigationData;
 const pinPort=createPinPort({storage:{getItem:key=>localStorage.getItem(key),setItem:(key,value)=>localStorage.setItem(key,value)},onChange:()=>{if(navigationData)render(navigationData)}});
 window.addEventListener('storage',event=>{if(event.key===pinPort.key||event.key===null){if(navigationData)render(navigationData)}});
@@ -105,7 +105,8 @@ function showNavigation(data) {
   bootScreen.hidden = true;
   setBrand(data.settings);
   render(data);
-  setTimeout(()=>import('/__WARM_URL__').then(m=>m.save(data)).catch(()=>{}),0);
+  const save=()=>import('/__WARM_URL__').then(m=>m.save(data)).catch(()=>{});
+  if('requestIdleCallback' in window)requestIdleCallback(save,{timeout:1000});else setTimeout(save,150);
   performance.mark("navdesk-content-ready");
   document.dispatchEvent(new Event("navdesk:ready"));
 }
