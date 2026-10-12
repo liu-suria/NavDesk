@@ -11,5 +11,5 @@ export async function bootstrap(context,{navigation,family}){
   if(wantsFamily)tasks.push(read('family',async()=>{const response=await family();const data=await response.json();return response.ok?{data}:{error:{status:response.status,message:data.error||'家庭事务暂不可用'}}}));
   Promise.all(tasks).finally(()=>{if(!closed){closed=true;controller.close()}});
  },cancel(){closed=true}});
- return new Response(body,{headers:{'Content-Type':'application/x-ndjson; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
+ return new Response(body,{headers:{'Content-Type':'application/x-ndjson; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Navdesk-Authenticated':'1'}});
 }

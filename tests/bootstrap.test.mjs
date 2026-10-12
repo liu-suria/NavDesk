@@ -7,11 +7,12 @@ const env={ADMIN_PASSWORD:'demo',SESSION_SECRET:'bootstrap-test-secret'};
 const encoder=new TextEncoder();
 async function context(family=true,authenticated=true){return {env,request:new Request('https://nav.example/api/bootstrap'+(family?'?family=1':''),{headers:authenticated?{Cookie:'__Host-navdesk_session='+await createSession(env.SESSION_SECRET)}:{}})}}
 test('bootstrap rejects unauthorized requests before reading either private data source',async()=>{
- let reads=0;const response=await bootstrap(await context(true,false),{navigation:()=>reads++,family:()=>reads++});assert.equal(response.status,401);assert.equal(reads,0);assert.equal(response.headers.get('Cache-Control'),'no-store');assert.deepEqual(await response.json(),{error:'Unauthorized'});
+ let reads=0;const response=await bootstrap(await context(true,false),{navigation:()=>reads++,family:()=>reads++});assert.equal(response.status,401);assert.equal(response.headers.get('X-Navdesk-Authenticated'),null);assert.equal(reads,0);assert.equal(response.headers.get('Cache-Control'),'no-store');assert.deepEqual(await response.json(),{error:'Unauthorized'});
 });
 test('authentication and navigation stream before a slow or failed Hub',async()=>{
  let release;const slow=new Promise(resolve=>release=resolve);
  const response=await bootstrap(await context(),{navigation:async()=>({groups:[]}),family:()=>slow});assert.equal(response.headers.get('Cache-Control'),'no-store');
+ assert.equal(response.headers.get('X-Navdesk-Authenticated'),'1');
  const reader=response.body.getReader(),decoder=new TextDecoder();const first=JSON.parse(decoder.decode((await reader.read()).value));assert.deepEqual(first,{type:'session',authenticated:true});
  const next=JSON.parse(decoder.decode((await reader.read()).value));assert.equal(next.type,'navigation');assert.deepEqual(next.data,{groups:[]});
  release(new Response(JSON.stringify({error:'连接已过期'}),{status:401}));const last=JSON.parse(decoder.decode((await reader.read()).value));assert.equal(last.type,'family');assert.equal(last.error.status,401);assert.equal((await reader.read()).done,true);
@@ -29,4 +30,11 @@ test('malformed, unauthorized and incomplete streams cannot publish navigation',
  for(const [body,status,type] of [['{"type":"navigation","data":{"groups":[]}}\n',200,'application/x-ndjson'],['{}',401,'application/json'],['{"type":"session","authenticated":true}\n',200,'application/x-ndjson']]){
   const state=start(Promise.resolve(new Response(body,{status,headers:{'Content-Type':type}})),{family:true});assert.ok((await state.navigation).error);assert.ok((await state.family).error);await state.finished;
  }
+});
+
+test('authenticated headers unlock the cache gate before buffered body data',async()=>{
+ let controller;const response=new Response(new ReadableStream({start(c){controller=c}}),{headers:{'Content-Type':'application/x-ndjson','X-Navdesk-Authenticated':'1'}});
+ const state=start(Promise.resolve(response));assert.deepEqual(await state.authenticated,{authenticated:true});
+ controller.enqueue(encoder.encode(JSON.stringify({type:'navigation',data:{groups:[]}})+'\n'));controller.close();assert.deepEqual((await state.navigation).data,{groups:[]});await state.finished;
+ const rejected=start(Promise.resolve(new Response('{}',{status:401,headers:{'Content-Type':'application/x-ndjson','X-Navdesk-Authenticated':'1'}})));assert.deepEqual(await rejected.authenticated,{authenticated:false});assert.equal((await rejected.navigation).error.status,401);await rejected.finished;
 });

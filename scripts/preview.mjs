@@ -28,7 +28,7 @@ const server = http.createServer(async (req,res) => {
       if(url.pathname==='/api/auth/logout')return respond(200,{ok:true},{'Set-Cookie':'navdesk_demo=; Path=/; Max-Age=0'});
       if(url.pathname==='/api/bootstrap'){
         if(mode==='unauthorized'||!req.headers.cookie?.includes('navdesk_demo=1'))return respond(401,{error:'Unauthorized'});
-        res.writeHead(200,{'Content-Type':'application/x-ndjson; charset=utf-8','Cache-Control':'no-store'});
+        res.writeHead(200,{'Content-Type':'application/x-ndjson; charset=utf-8','Cache-Control':'no-store','X-Navdesk-Authenticated':'1'});
         const send=value=>res.write(JSON.stringify(value)+'\n');send({type:'session',authenticated:true});
         if(url.searchParams.get('family')==='1')send(req.headers.cookie?.includes('family_demo=1')?{type:'family',data:family}:{type:'family',error:{status:401,message:'请连接家庭事务'}});
         if(delay)await new Promise(resolve=>setTimeout(resolve,delay));
