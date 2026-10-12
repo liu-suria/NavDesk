@@ -24,7 +24,7 @@ body { margin: 0; color: var(--text); min-height: 100vh; }
 .count { font-size: 11px; color: var(--muted); margin-left: 1px; }
 .cards { display: grid; }
 .nav-card { display: flex; align-items: center; min-width: 0; text-decoration: none; color: var(--text); }
-.site-icon { flex: 0 0 34px; display: grid; place-items: center; overflow: hidden; color: var(--accent); }
+ .site-icon { position:relative;flex: 0 0 34px; display: grid; place-items: center; overflow: hidden; color: var(--accent); }
 .site-icon img { object-fit: contain; }
 .card-copy { min-width: 0; display: grid; }
 .card-copy strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -65,7 +65,6 @@ body { margin: 0; color: var(--text); min-height: 100vh; }
 .category-rail b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 650; }
 .nav-group { scroll-margin-top: 96px; }
 .group-icon { width: 24px; height: 24px; border-radius: 7px; }
-.cards { justify-content: start; }
 @media (max-width: 960px) {
 .cards { grid-template-columns: repeat(auto-fill, 144px); }
 }
@@ -82,7 +81,6 @@ body { margin: 0; color: var(--text); min-height: 100vh; }
 }
 .boot-screen { min-height: 180px; padding: 32px 0; }
 .boot-screen:not([hidden]) ~ .workspace-layout { display: none; }
-.site-icon { position: relative; }
 .site-icon img { position: absolute; }
 @media(prefers-reduced-motion:reduce) {
 *,*::before,*::after { scroll-behavior: auto!important; transition: none!important; }

@@ -37,7 +37,7 @@
     <div class="workspace-layout">
       <aside class="category-rail" id="categoryRail" aria-label="分类快速跳转"></aside>
       <div class="navigation-column" id="navigationPanel" aria-labelledby="navigationTab">
-        <section id="pinnedSection" class="nav-group pinned-section" hidden><div class="group-heading"><span class="group-icon">★</span><h2>常用置顶</h2><span class="count" id="pinnedCount"></span></div><div id="pinnedCards" class="cards"></div></section>
+        <section id="pinnedSection" class="nav-group pinned-section" hidden><div class="group-heading"><h2>常用置顶</h2><span class="count" id="pinnedCount"></span></div><div id="pinnedCards" class="cards"></div></section>
         <section id="navigation" class="navigation" aria-live="polite"></section>
       </div>
       <aside id="familyPanel" class="family-panel" aria-label="家庭事务" aria-labelledby="familyTab"><div class="family-placeholder">家庭事务<span>稍后加载</span></div></aside>
@@ -46,7 +46,7 @@
   <section class="login-screen" id="loginScreen" hidden>
     <div class="login-card"><span class="brand-mark large" id="loginBrandMark">N</span><p class="eyebrow">PRIVATE NAVIGATION</p><h1>你的个人导航台</h1><p>输入密码，进入仅属于你的工作空间。</p><form id="loginForm"><input id="password" type="password" autocomplete="current-password" placeholder="请输入密码" required /><button class="primary" type="submit">进入 <span id="loginBrandName">NavDesk</span> <span>→</span></button><p class="form-message" id="loginMessage"></p></form></div>
   </section>
-  <template id="groupTemplate"><section class="nav-group"><div class="group-heading"><span class="group-icon"></span><h2></h2><span class="count"></span></div><div class="cards"></div></section></template>
+  <template id="groupTemplate"><section class="nav-group"><div class="group-heading"><h2></h2><span class="count"></span></div><div class="cards"></div></section></template>
   <p id="pageMessage" class="page-message" role="status" hidden></p>
   <button id="backToTop" class="back-to-top" aria-label="回到顶部" hidden>↑</button>
   <!-- APP -->

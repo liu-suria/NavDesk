@@ -65,9 +65,6 @@ function render(data) {
     const node = reuse?previous:$("#groupTemplate").content.firstElementChild.cloneNode(true);
     if(!reuse){node.__fingerprint=fingerprint;
     node.id = groupId;
-    $(".group-icon", node).textContent = group.icon || "◆";
-    $(".group-icon", node).style.background = `${group.color}22`;
-    $(".group-icon", node).style.color = group.color;
     $("h2", node).textContent = group.name; $(".count", node).textContent = String(links.length).padStart(2, "0");
     const cards = $(".cards", node);
     links.forEach(link=>cards.append(createTile(group,link)));

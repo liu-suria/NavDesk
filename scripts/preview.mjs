@@ -26,6 +26,14 @@ const server = http.createServer(async (req,res) => {
       if(url.pathname==='/api/auth/login')return JSON.parse(raw).password==='demo'?respond(200,{ok:true},{'Set-Cookie':'navdesk_demo=1; Path=/; HttpOnly; SameSite=Strict'}):respond(401,{error:'密码不正确'});
       if(url.pathname==='/api/auth/session')return respond(200,{authenticated:mode!=='unauthorized'&&!!req.headers.cookie?.includes('navdesk_demo=1')});
       if(url.pathname==='/api/auth/logout')return respond(200,{ok:true},{'Set-Cookie':'navdesk_demo=; Path=/; Max-Age=0'});
+      if(url.pathname==='/api/bootstrap'){
+        if(mode==='unauthorized'||!req.headers.cookie?.includes('navdesk_demo=1'))return respond(401,{error:'Unauthorized'});
+        res.writeHead(200,{'Content-Type':'application/x-ndjson; charset=utf-8','Cache-Control':'no-store'});
+        const send=value=>res.write(JSON.stringify(value)+'\n');send({type:'session',authenticated:true});
+        if(url.searchParams.get('family')==='1')send(req.headers.cookie?.includes('family_demo=1')?{type:'family',data:family}:{type:'family',error:{status:401,message:'请连接家庭事务'}});
+        if(delay)await new Promise(resolve=>setTimeout(resolve,delay));
+        const {trash,...visible}=navigation;send(mode==='error'?{type:'navigation',error:{status:503,message:'模拟服务故障'}}:{type:'navigation',data:visible});return res.end();
+      }
       if(url.pathname.startsWith('/api/family/')){
         if(!req.headers.cookie?.includes('navdesk_demo=1'))return respond(401,{error:'Unauthorized'});
         if(url.pathname==='/api/family/login'){if(JSON.parse(raw).password!=='demo')return respond(401,{error:'家庭事务密码不正确'});return respond(200,{ok:true},{'Set-Cookie':'family_demo=1; Path=/; HttpOnly; SameSite=Strict'})}

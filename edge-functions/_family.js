@@ -31,6 +31,10 @@ export async function loginFamily(context,fetcher=fetch){
 export async function logoutFamily(context){const auth=await requireAuth(context);return auth.response||json({ok:true},200,{'Set-Cookie':familyCookie('',0)})}
 export async function proxyFamily(context,resource,fetcher=fetch){
  const auth=await requireAuth(context);if(auth.response)return auth.response;
+ return readFamily(context,resource,fetcher);
+}
+// Internal only: callers must have passed requireAuth before reaching this helper.
+export async function readFamily(context,resource,fetcher=fetch){
  const methods={ledger:['GET'],events:['GET','POST','PATCH']};
  if(!methods[resource]?.includes(context.request.method))return json({error:'Method not allowed'},405);
  const apiKey=context.env?.HOMELEDGER_API_KEY||globalThis.HOMELEDGER_API_KEY;

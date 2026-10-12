@@ -21,10 +21,12 @@ window.navdeskBoot = (() => {
       throw error;
     } finally { clearTimeout(timeout); }
   }
-  // Handle rejection immediately, including failures before the page script runs.
-  const navigation = request(location.pathname.startsWith('/admin')?'/api/navigation':'/api/navigation?view=list',{},false,false).then(data => ({ data }), error => ({ error }));
-  // Desktop Hub data starts in parallel; mobile keeps it on demand.
-  const family=!location.pathname.startsWith('/admin')&&matchMedia('(min-width:1100px)').matches?request('/api/family/ledger',{},false,false).then(data=>({data}),error=>({error})):null;
-  const cached=!location.pathname.startsWith('/admin')&&read('navdesk-cache-ready')?import('/__WARM_URL__').then(m=>m.fastStart(navigation,request)).catch(()=>navigation):navigation;
-  return { read, write, request, family, navigation:Promise.race([navigation,cached]) };
+  if(location.pathname.startsWith('/admin'))return {read,write,request,navigation:request('/api/navigation',{},false,false).then(data=>({data}),error=>({error}))};
+  const family=matchMedia('(min-width:1100px)').matches,controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),15000);
+  const response=fetch('/api/bootstrap'+(family?'?family=1':''),{credentials:'same-origin',cache:'no-store',signal:controller.signal});response.catch(()=>{});
+  const started=import('/__WARM_URL__').then(m=>m.start(response,{cached:!!read('navdesk-cache-ready'),family}));
+  const navigation=started.then(state=>state.navigation).catch(error=>({error}));
+  started.then(state=>state.finished).finally(()=>clearTimeout(timer)).catch(()=>controller.abort());
+  return {read,write,request,navigation,family:family?started.then(state=>state.family).catch(error=>({error})):null};
 })();

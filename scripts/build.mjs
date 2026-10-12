@@ -14,7 +14,7 @@ const searchURL=asset('search',read('search.mjs').replace('./vendor/pinyin-dict.
 const uiURL=asset('dialogs',`const style=document.createElement('style');style.textContent=${JSON.stringify(css(read('interactions.css')))};document.head.append(style);`);
 const lazyStyle=text=>`import './${uiURL}';\n`+text;
 const recoveryURL=asset('recovery',lazyStyle(read('recovery.mjs')));
-const warmURL=asset('warmstart',read('warmstart.mjs'));
+const warmURL=asset('warmstart',read('warmstart.mjs')+'\n'+read('startup.mjs').replace("import {fastStart} from './warmstart.mjs';\n",''));
 const lunarURL=asset('lunar',read('lunar.mjs'));
 const calendarURL=asset('calendar',read('calendar.mjs').replace('__LUNAR_URL__',lunarURL).replace('__TERMS_2026__',JSON.stringify(JSON.parse(read('calendar-data/2026.json')))));
 const schemaURL=asset('navschema',read('edge-functions/_navigation-model.js'));
