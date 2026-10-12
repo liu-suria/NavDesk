@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {parseTerms,loadTerms} from '../edge-functions/_calendar.js';
 const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
 const asset=html.match(/import\('\/(calendar\.[a-f0-9]+\.mjs)'\)/)[1];
-const {dayStatus,festivals}=await import('../'+asset);
+const {dayStatus,festivals,lunarText}=await import('../'+asset);
 const date=s=>new Date(s+'T12:00:00');
 test('official makeup days differ from festivals',()=>{
  assert.equal(dayStatus(date('2026-09-20')).kind,'work');assert.equal(dayStatus(date('2026-09-25')).kind,'rest');assert.equal(dayStatus(date('2027-10-01')).kind,'unknown');assert.deepEqual(festivals(date('2026-09-25')),['中秋节']);
@@ -19,4 +19,9 @@ test('solar term parser validates full year and rejects incomplete upstream data
  assert.deepEqual(parseTerms(text,2026),terms);assert.equal(terms['2026-09-23'],'秋分');assert.throws(()=>parseTerms('error',2026));
  await assert.rejects(()=>loadTerms(1899,()=>assert.fail('no network')));
  await assert.rejects(()=>loadTerms(2026,async()=>new Response('upstream offline',{status:503})));
+});
+
+test('calendar cell lunar dates keep their Gregorian day in overseas device timezones',()=>{
+ const previous=process.env.TZ;process.env.TZ='America/Los_Angeles';
+ try{assert.equal(lunarText(new Date(2026,9,12,12)),'九月初三');assert.ok(festivals(new Date(2026,1,17,12)).includes('春节'))}finally{if(previous===undefined)delete process.env.TZ;else process.env.TZ=previous}
 });

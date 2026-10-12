@@ -16,7 +16,7 @@ function formatClock() {
   $('#clockDate').textContent=clockDateFormat.format(now);
   $('#clockTime').textContent=part('hour')+':'+part('minute')+':'+part('second');
   $('#clock').dateTime=$('#clockTime').dateTime=now.toISOString();
-  const key=now.toDateString();if(key!==lunarDateKey){$('#clockLunar').textContent=formatLunar(now)+'['+weekday+']';lunarDateKey=key}
+  const key=clockDateFormat.format(now);if(key!==lunarDateKey){$('#clockLunar').textContent=formatLunar(now)+'['+weekday+']';lunarDateKey=key}
 }
 function setTheme(theme) { document.documentElement.dataset.theme = theme; write("navdesk-theme", theme); }
 

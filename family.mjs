@@ -10,7 +10,8 @@ export function eventBuckets(events,today){
 export function mountFamily(root,request,initial){
  if(!document.querySelector('[data-family-css]')){const sheet=document.createElement('link');sheet.rel='stylesheet';sheet.href='/__FAMILY_CSS_URL__';sheet.dataset.familyCss='1';document.head.append(sheet)}
  let ledger=null,filter='all',query='',busy=false,typeFilter='',filtersOpen=false;
- const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+ const dateFormat=new Intl.DateTimeFormat('en-u-ca-gregory-nu-latn',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit'});
+ const today=()=>{const parts=dateFormat.formatToParts(new Date()),value=t=>parts.find(p=>p.type===t).value;return value('year')+'-'+value('month')+'-'+value('day')};
  const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const field=(label,name,value,type='text')=>`<label>${label}<input name="${name}" type="${type}" value="${esc(value)}" ${['title','date'].includes(name)?'required':''}></label>`;
  const shell=()=>`<header class="family-heading"><div><span class="family-eyebrow">FAMILY HUB</span><h2>Family Hub</h2></div><div class="family-actions"><button type="button" data-action="filters" aria-label="显示分类和搜索">筛选</button><button type="button" data-action="refresh" aria-label="刷新家庭事务">↻</button><button type="button" class="family-primary" data-action="new">＋ 新增</button></div></header><p class="family-message" role="status" aria-live="polite"></p>`;
