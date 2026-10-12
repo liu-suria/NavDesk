@@ -23,5 +23,6 @@ window.navdeskBoot = (() => {
   }
   // Handle rejection immediately, including failures before the page script runs.
   const navigation = request(location.pathname.startsWith('/admin')?'/api/navigation':'/api/navigation?view=list',{},false,false).then(data => ({ data }), error => ({ error }));
-  return { read, write, request, navigation };
+  const cached=!location.pathname.startsWith('/admin')&&read('navdesk-cache-ready')?import('/__WARM_URL__').then(m=>m.fastStart(navigation,request)).catch(()=>navigation):navigation;
+  return { read, write, request, navigation:Promise.race([navigation,cached]) };
 })();

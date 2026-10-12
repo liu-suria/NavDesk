@@ -105,9 +105,12 @@ function showNavigation(data) {
   bootScreen.hidden = true;
   setBrand(data.settings);
   render(data);
+  setTimeout(()=>import('/__WARM_URL__').then(m=>m.save(data)).catch(()=>{}),0);
   performance.mark("navdesk-content-ready");
   document.dispatchEvent(new Event("navdesk:ready"));
 }
+
+document.addEventListener('navdesk:fresh',({detail})=>{if(detail.error?.status===401)showLogin();else if(detail.data&&(!navigationData?.updatedAt||detail.data.updatedAt>navigationData.updatedAt))showNavigation(detail.data)});
 
 async function initialise(first = false) {
   bootScreen.hidden = false;

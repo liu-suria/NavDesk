@@ -15,6 +15,7 @@ const searchURL=asset('search',read('search.mjs').replace('./vendor/pinyin-dict.
 const uiURL=asset('dialogs',`const style=document.createElement('style');style.textContent=${JSON.stringify(css(read('interactions.css')))};document.head.append(style);`);
 const lazyStyle=text=>`import './${uiURL}';\n`+text;
 const recoveryURL=asset('recovery',lazyStyle(read('recovery.mjs')));
+const warmURL=asset('warmstart',read('warmstart.mjs'));
 const lunarURL=asset('lunar',read('lunar.mjs'));
 const calendarURL=asset('calendar',read('calendar.mjs').replace('__LUNAR_URL__',lunarURL).replace('__TERMS_2026__',JSON.stringify(JSON.parse(read('calendar-data/2026.json')))));
 const schemaURL=asset('navschema',read('edge-functions/_navigation-model.js'));
@@ -26,21 +27,21 @@ for (const [name, output, script, styles] of [
   ['admin', 'admin/index.html', 'admin/app.js', ['style.css', 'admin/admin.css']],
 ]) {
   const html = read(`templates/${name}.html`)
-    .replace('<!-- BOOT -->', () => `<script>${inlineJS(read('boot.js').replace('__RECOVERY_URL__',recoveryURL))}</script>`)
+    .replace('<!-- BOOT -->', () => `<script>${inlineJS(read('boot.js').replace('__RECOVERY_URL__',recoveryURL).replaceAll('__WARM_URL__',warmURL))}</script>`)
     .replace('<!-- STYLE -->', () => `<style>${css(styles.map(read).join('\n'))}</style>`)
-    .replace('<!-- APP -->', () => `<script>${inlineJS((name==='home'?read('family-loader.js').replace('__FAMILY_URL__',familyURL)+'\n':'')+read('icons.js')+'\n'+read('services.js')+'\n'+read('manager-loader.js').replace('__MANAGE_URL__',manageURL)+'\n'+(name==='home'?read('lunar.mjs').replaceAll('export ','')+'\n':'')+read(script).replace('__SEARCH_URL__',searchURL).replace('__CALENDAR_URL__',calendarURL).replaceAll('__MODEL_URL__',modelURL).replace('__EDITOR_URL__',editorURL))}</script>`);
+    .replace('<!-- APP -->', () => `<script>${inlineJS((name==='home'?read('family-loader.js').replace('__FAMILY_URL__',familyURL)+'\n':'')+read('icons.js')+'\n'+read('services.js')+'\n'+read('manager-loader.js').replace('__MANAGE_URL__',manageURL)+'\n'+(name==='home'?read('lunar.mjs').replaceAll('export ','')+'\n':'')+read(script).replaceAll('__WARM_URL__',warmURL).replace('__SEARCH_URL__',searchURL).replace('__CALENDAR_URL__',calendarURL).replaceAll('__MODEL_URL__',modelURL).replace('__EDITOR_URL__',editorURL))}</script>`);
   writeFileSync(output, html);
   console.log(`${output}: ${Buffer.byteLength(html)} B; gzip ${gzipSync(html).length} B; no external JS/CSS`);
 }
 
 // Only remove obsolete generated assets after every output has been written.
-const currentAssets=new Set([calendarURL,modelURL,manageURL,schemaURL,uiURL,recoveryURL,editorURL,familyURL,searchURL,pinyinURL,lunarURL]);
+const currentAssets=new Set([calendarURL,modelURL,manageURL,schemaURL,uiURL,recoveryURL,editorURL,familyURL,searchURL,pinyinURL,lunarURL,warmURL]);
 // Content-addressed public code can be reused indefinitely; private API data is never cached here.
 const deployment=JSON.parse(read('edgeone.json'));
-deployment.headers=deployment.headers.filter(rule=>!/^family\.[a-f0-9]{12}\.css$/.test(rule.source.replace(/^\//,''))&&!/^\/(calendar|model|manage|navschema|dialogs|recovery|editor|family|search|pinyin|lunar)\.[a-f0-9]{12}\.mjs$/.test(rule.source));
+deployment.headers=deployment.headers.filter(rule=>!/^family\.[a-f0-9]{12}\.css$/.test(rule.source.replace(/^\//,''))&&!/^\/(calendar|model|manage|navschema|dialogs|recovery|editor|family|search|pinyin|lunar|warmstart)\.[a-f0-9]{12}\.mjs$/.test(rule.source));
 for(const path of currentAssets)deployment.headers.unshift({source:'/'+path,headers:[{key:'Cache-Control',value:'public, max-age=31536000, immutable'},{key:'Content-Type',value:'text/javascript; charset=utf-8'}]});
 deployment.headers.unshift({source:'/'+familyCSSURL,headers:[{key:'Cache-Control',value:'public, max-age=31536000, immutable'},{key:'Content-Type',value:'text/css; charset=utf-8'}]});
 writeFileSync('edgeone.json',JSON.stringify(deployment,null,2)+'\n');
-for(const file of readdirSync('.'))if(/^(calendar|model|manage|navschema|dialogs|recovery|editor|family|search|pinyin|lunar)\.[a-f0-9]{12}\.mjs$/.test(file)&&!currentAssets.has(file))unlinkSync(file);
+for(const file of readdirSync('.'))if(/^(calendar|model|manage|navschema|dialogs|recovery|editor|family|search|pinyin|lunar|warmstart)\.[a-f0-9]{12}\.mjs$/.test(file)&&!currentAssets.has(file))unlinkSync(file);
 
 for(const file of readdirSync('.'))if(/^family\.[a-f0-9]{12}\.css$/.test(file)&&file!==familyCSSURL)unlinkSync(file);

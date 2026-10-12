@@ -24,6 +24,7 @@ const server = http.createServer(async (req,res) => {
       requests.push({method:req.method,path:url.pathname});
       const chunks=[];for await(const part of req)chunks.push(part);const raw=Buffer.concat(chunks).toString();
       if(url.pathname==='/api/auth/login')return JSON.parse(raw).password==='demo'?respond(200,{ok:true},{'Set-Cookie':'navdesk_demo=1; Path=/; HttpOnly; SameSite=Strict'}):respond(401,{error:'密码不正确'});
+      if(url.pathname==='/api/auth/session')return respond(200,{authenticated:mode!=='unauthorized'&&!!req.headers.cookie?.includes('navdesk_demo=1')});
       if(url.pathname==='/api/auth/logout')return respond(200,{ok:true},{'Set-Cookie':'navdesk_demo=; Path=/; Max-Age=0'});
       if(url.pathname.startsWith('/api/family/')){
         if(!req.headers.cookie?.includes('navdesk_demo=1'))return respond(401,{error:'Unauthorized'});
@@ -65,7 +66,7 @@ const server = http.createServer(async (req,res) => {
       return respond(200,navigation);
     }
     const path=url.pathname==='/'?'index.html':url.pathname==='/admin/'?'admin/index.html':url.pathname.slice(1);
-    if(!['index.html','admin/index.html','favicon.svg','site.webmanifest'].includes(path)&&!/^family\.[a-f0-9]{12}\.css$/.test(path)&&!/^(manage|model|calendar|navschema|dialogs|recovery|editor|family|search|pinyin|lunar)\.[a-f0-9]{12}\.mjs$/.test(path))return respond(404,{});
+    if(!['index.html','admin/index.html','favicon.svg','site.webmanifest'].includes(path)&&!/^family\.[a-f0-9]{12}\.css$/.test(path)&&!/^(manage|model|calendar|navschema|dialogs|recovery|editor|family|search|pinyin|lunar|warmstart)\.[a-f0-9]{12}\.mjs$/.test(path))return respond(404,{});
     const body=await readFile(`${root}/${path}`);
     res.writeHead(200,{'Content-Type':path.endsWith('.mjs')?'text/javascript; charset=utf-8':path.endsWith('.html')?'text/html; charset=utf-8':path.endsWith('.svg')?'image/svg+xml':path.endsWith('.css')?'text/css; charset=utf-8':'application/manifest+json'});res.end(body);
   }catch{respond(500,{error:'Local preview error'})}

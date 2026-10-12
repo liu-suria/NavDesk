@@ -12,7 +12,7 @@ body { margin: 0; color: var(--text); min-height: 100vh; }
 .brand { display: flex; align-items: center; color: var(--text); text-decoration: none; }
 .brand-mark { display: grid; place-items: center; color: white; font-weight: bold; }
 .top-actions { display: flex; align-items: center; }
-.icon-button { border: 1px solid var(--line); background: var(--surface); color: var(--text); height: 34px; border-radius: 10px; padding: 0 12px; text-decoration: none; font: 600 13px inherit; cursor: pointer; }
+.icon-button { border: 1px solid var(--line); background: var(--surface); color: var(--text); height: 34px; border-radius: 10px; text-decoration: none; font: 600 13px inherit; cursor: pointer; }
 .icon-button { font-size: 18px; padding: 0 10px; }
 .eyebrow { font-size: 11px; letter-spacing: 1.6px; color: var(--accent); font-weight: 800; margin: 0 0 14px; }
 .login-card h1 { line-height: 1.1; margin: 0 0 14px; }
@@ -76,9 +76,6 @@ body { margin: 0; color: var(--text); min-height: 100vh; }
 .web-search select { max-width: 115px; padding-left: 13px; font-size: 14px; }
 .web-search input { padding-inline: 14px; font-size: 15px; }
 .web-search button { width: 52px; font-size: 31px; }
-.category-rail { position: sticky; top: 0; z-index: 3; display: flex; align-items: center; gap: 8px; max-height: none; overflow: visible; background: var(--bg); }
-.category-rail a { flex: 0 0 auto; min-height: 38px; padding: 7px 11px; gap: 8px; border: 1px solid var(--line); background: var(--surface); }
-.category-rail a span { width: 22px; height: 22px; flex-basis: 22px; font-size: 11px; }
 .nav-group { scroll-margin-top: 115px; }
 .card-copy strong { font-size: 12px; }
 .card-copy small { display: none; }
@@ -98,8 +95,7 @@ body { margin: 0; color: var(--text); min-height: 100vh; }
 body { background: var(--bg); }
 .topbar { background: transparent; }
 .brand { letter-spacing: -.5px; }
-.brand-mark,.primary { background: #295d99; box-shadow: none; }
-.brand-mark { font-family: inherit; }
+.primary { background: var(--accent); }
 .web-search { background: var(--surface); }
 .count { font-variant-numeric: tabular-nums; }
 .nav-tile { position: relative; min-width: 0; }
@@ -118,8 +114,6 @@ body { background: var(--bg); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 @media(max-width:650px) {
 .topbar { height: auto; min-height: 0; }
-.category-rail { flex-wrap: nowrap; overflow-x: auto; padding: 10px 0 14px; }
-.category-rail a { font-size: 12px; }
 .nav-card { min-height: 76px; padding: 12px 26px 12px 9px; gap: 8px; }
 .site-icon { flex-basis: 26px; height: 26px; }
 .card-edit { opacity: 1; right: 0; top: 0; width: 30px; height: 34px; }
@@ -145,7 +139,6 @@ body { background: var(--bg); }
 @media(max-width:650px) {
 .app-shell .group-add,.app-shell .group-sort,.app-shell .card-edit,.app-shell #sortGroups { display: none!important; }
 .app-shell .top-actions { margin-left: auto; flex: none; }
-.app-shell .category-rail { scrollbar-width: none; overscroll-behavior-x: contain; max-width: 100%; }
 .app-shell .category-rail::-webkit-scrollbar { display: none; }
 .app-shell .nav-group { scroll-margin-top: 72px; }
 .app-shell .container { padding-bottom: calc(28px + env(safe-area-inset-bottom)); }
@@ -195,9 +188,6 @@ html[data-theme="light"] { --bg: #faf7f8; --surface: rgba(255,255,255,.58); --su
 .app-shell .brand-mark { width: 32px; height: 32px; border-radius: 10px; }
 .app-shell .icon-button:not([role=tab]) { width: 40px; min-width: 40px; height: 40px; min-height: 40px; border-radius: 12px; }
 .app-shell .workspace-layout { display: block; }
-.app-shell .category-rail { border: 0; gap: 8px; background: var(--bg); }
-.app-shell .category-rail a { border-radius: 10px; gap: 7px; background: var(--surface); }
-.app-shell .category-rail a span { width: 20px; height: 20px; flex-basis: 20px; border-radius: 6px; }
 .app-shell .group-actions { display: none; }
 .app-shell .group-heading .group-icon { width: 25px; height: 25px; border-radius: 8px; }
 .app-shell .group-heading .count { margin-left: auto; }
@@ -218,12 +208,9 @@ html[data-theme="light"] { --bg: #faf7f8; --surface: rgba(255,255,255,.58); --su
 .app-shell .card-copy { gap: 0; }
 .app-shell .card-copy strong { font-size: 12px; font-weight: 500; line-height: 18px; }
 .app-shell .card-copy small { display: none; }
-.app-shell .category-rail { padding: 3px 0 10px; }
-.app-shell .category-rail a { min-height: 34px; padding: 5px 9px; font-size: 12px; }
 }
 @media(max-width:650px) {
-.app-shell .category-rail { display: none; }
-.app-shell .workspace-layout { margin-top: 4px; }
+.app-shell .app-shell .workspace-layout { margin-top: 4px; }
 }
 @media(min-width:651px) {
 .app-shell .nav-card { min-height: 64px; padding: 10px 28px 10px 12px; gap: 10px; }
